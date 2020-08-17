@@ -1,13 +1,7 @@
 <template>
   <v-app>
     <v-app-bar fixed app>
-      <v-tabs
-        v-model="tab"
-        class="elevation-2"
-        dark
-        centered="centered"
-        fixed-tabs
-      >
+      <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
         <v-tabs-slider />
         <v-tab
           v-for="(item, i) in items"
@@ -17,7 +11,7 @@
         />
       </v-tabs>
     </v-app-bar>
-    <v-tabs-items v-model="model">
+    <v-tabs-items>
       <v-tab-item
         v-for="(item, i) in items"
         :key="i"
