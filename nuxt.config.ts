@@ -6,7 +6,7 @@ const config: Configuration = {
    ** Nuxt rendering mode
    ** See https://nuxtjs.org/api/configuration-mode
    */
-  mode: 'universal',
+  mode: 'spa',
   srcDir: 'app',
   /*
    ** Nuxt target
