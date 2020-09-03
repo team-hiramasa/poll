@@ -39,11 +39,17 @@
 <script>
 import firebase from "@/plugins/firebase"
 const db = firebase.firestore()
-const dbSubjects = db.collection("subjects").doc("ATlLzLcoYDuMEL53jyjD").get()
-console.log("------- db -------")
-console.log(db)
-console.log("------- dbSubjects -------")
-console.log(dbSubjects)
+const subjectsRef = db.collection("subjects").get()
+subjectsRef
+  .then((res) => {
+    const subjects = res
+    subjects.forEach((doc) => {
+      console.log(doc.id, "=>", doc.data())
+    })
+  })
+  .catch((err) => {
+    console.log("Error getting documents", err)
+  })
 
 export default {
   data() {
@@ -58,7 +64,6 @@ export default {
           to: "/#created",
         },
       ],
-      subjects: dbSubjects,
     }
   },
 }
