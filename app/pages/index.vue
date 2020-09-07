@@ -20,13 +20,12 @@
       />
     </v-tabs-items>
     <v-list>
-      <template v-for="(subject, index) in subjects">
-        <v-list-item :key="index" :to="subject.id">
-          <v-list-item-content>
-            <v-list-item-title>{{ subject.title }} </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
+      <v-list-item
+        v-for="(subject, index) in subjects"
+        :key="index"
+        :to="subject.id"
+        v-text="subject.title"
+      />
     </v-list>
     <p>これはpタグ：{{ subjects[0].title }}</p>
   </v-app>
@@ -38,7 +37,6 @@ const db = firebase.firestore()
 
 export default {
   async asyncData() {
-    // const subjects = params.id
     return {
       subjects: await getSubjects(),
     }
@@ -63,29 +61,43 @@ async function getSubjects() {
   return await db
     .collection("subjects")
     .get()
-    .then((res) => {
+    .then((snapshot) => {
       console.log(
         "startGetSubjects ==============================================================="
       )
-      res.forEach((doc) => {
+      snapshot.forEach((doc) => {
         console.log(doc.id, "=>", doc.data())
       })
       console.log(
         "end ============================================================================"
       )
+
       const subjects = []
-      res.forEach((doc) => {
-        const params = doc.data()
+      if (snapshot.empty) {
+        console.log("Nomatching documents.")
         subjects.push({
-          id: doc.id,
-          title: params.title,
-          authId: params.authId,
-          isPublic: params.isPublic,
-          isCloseVoted: params.isCloseVoted,
-          visibleOrder: params.visibleOrder,
-          createdAt: params.createdAt,
+          id: "",
+          title: "見つかりませんでした",
+          authId: "",
+          isPublic: "",
+          isCloseVoted: "",
+          visibleOrder: "",
+          createdAt: "",
         })
-      })
+      } else {
+        snapshot.forEach((doc) => {
+          const params = doc.data()
+          subjects.push({
+            id: doc.id,
+            title: params.title,
+            authId: params.authId,
+            isPublic: params.isPublic,
+            isCloseVoted: params.isCloseVoted,
+            visibleOrder: params.visibleOrder,
+            createdAt: params.createdAt,
+          })
+        })
+      }
       return subjects
     })
     .catch((err) => {
