@@ -27,7 +27,10 @@
         v-text="subject.title"
       />
     </v-list>
-    <p>これはpタグ：{{ subjects[0].title }}</p>
+    <p>{{ counter }}</p>
+    <button @click="countUp">
+      COUNN UP
+    </button>
   </v-app>
 </template>
 
@@ -43,6 +46,7 @@ export default {
   },
   data() {
     return {
+      counter: 0,
       items: [
         {
           title: "回答した質問",
@@ -54,6 +58,11 @@ export default {
         },
       ],
     }
+  },
+  methods: {
+    countUp() {
+      this.counter += 1
+    },
   },
 }
 
