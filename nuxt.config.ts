@@ -95,6 +95,9 @@ const config: Configuration = {
     APP_measurementId: process.env.APP_measurementId,
     APP_MAPS_JS_API: process.env.APP_MAPS_JS_API,
   },
+  router: {
+    middleware: "auth",
+  },
 }
 
 export default config
