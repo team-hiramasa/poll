@@ -6,7 +6,7 @@ const config: Configuration = {
    ** Nuxt rendering mode
    ** See https://nuxtjs.org/api/configuration-mode
    */
-  mode: 'universal',
+  mode: 'spa',
   srcDir: 'app',
   /*
    ** Nuxt target
@@ -84,6 +84,17 @@ const config: Configuration = {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {},
+  env: {
+    APP_apiKey: process.env.APP_apiKey,
+    APP_authDomain: process.env.APP_authDomain,
+    APP_databaseURL: process.env.APP_databaseURL,
+    APP_projectId: process.env.APP_projectId,
+    APP_storageBucket: process.env.APP_storageBucket,
+    APP_messagingSenderId: process.env.APP_messagingSenderId,
+    APP_appId: process.env.APP_appId,
+    APP_measurementId: process.env.APP_measurementId,
+    APP_MAPS_JS_API: process.env.APP_MAPS_JS_API,
+  },
 }
 
 export default config
