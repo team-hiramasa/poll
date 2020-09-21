@@ -1,14 +1,21 @@
 <template>
   <v-layout>
     <v-flex class="text-center">
-      <img src="/v.png" alt="Vuetify.js" class="mb-5" />
-      <blockquote class="blockquote">
-        <footer>
-          <small>
-            <em>This ID is "{{ $route.params.id }}"</em>
-          </small>
-        </footer>
-      </blockquote>
+      質問の編集
+      <!-- 質問 -->
+      入力例：好きなスポーツは？
+      <!-- 回答 -->
+      入力例：改行で選択肢になります。
+      サッカー
+      野球
+      バスケ
+      テニス
+      <!-- 投票結果をすぐに公開するかどうか -->
+      <!-- 公開しない／公開する -->
+      <!-- 投票結果の票数を表示するかどうか -->
+      <!-- 公開しない／公開する -->
+      <!-- 投票結果を何位まで表示するか -->
+      
     </v-flex>
   </v-layout>
 </template>
