@@ -43,6 +43,7 @@ export default {
   },
   methods: {
     countUp() {
+      console.log("Click NOW!!1")
       this.counter += 1
     },
     fetchVoted: getVotedSubjects(),
