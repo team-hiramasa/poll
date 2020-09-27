@@ -59,17 +59,20 @@ async function getSubjects() {
 
 // WIP
 // 自分が投稿した質問を配列で返す
-async function getVotedSubjects() {
-  return await db
-    .collection("subjects")
-    .where("authId", "==", "1q2a3s45dtuvybiunoip")
-    .get()
-    .then((snapshot) => {
-      return convertToSubjectsArray(snapshot)
+function getVotedSubjects() {
+  return new Promise((resolve) => {
+    firebase.auth().onAuthStateChanged((user) => {
+      db.collection("votes")
+        .where("authId", "==", user.uid)
+        .get()
+        .then((snapshot) => {
+          resolve(convertToSubjectsListFromVotesCollection(snapshot))
+        })
+        .catch((err) => {
+          console.log("Error getting documents", err)
+        })
     })
-    .catch((err) => {
-      console.log("Error getting documents", err)
-    })
+  })
 }
 
 // WIP
@@ -88,6 +91,36 @@ function getCreatedSubjects() {
         })
     })
   })
+}
+
+// votes コレクションから取得したレコードを質問配列へと変換する
+function convertToSubjectsListFromVotesCollection(snapshot) {
+  const subjects = []
+  if (snapshot.empty) {
+    console.log("No matching documents.")
+    subjects.push({
+      title: "見つかりませんでした",
+      subjectId: "",
+      optionId: "",
+      authId: "",
+      comment: "",
+      createdAt: "",
+    })
+  } else {
+    snapshot.forEach((doc) => {
+      const params = doc.data()
+      subjects.push({
+        id: doc.id,
+        title: params.questionTitle,
+        subjectId: params.subjectId,
+        optionId: params.optionId,
+        authId: params.authId,
+        comment: params.comment,
+        createdAt: params.createdAt,
+      })
+    })
+  }
+  return subjects
 }
 
 // firestore から取得したレコードを質問配列へと変換する
