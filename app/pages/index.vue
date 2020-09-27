@@ -31,7 +31,7 @@ firebase.auth().signInAnonymously()
 export default {
   async asyncData() {
     return {
-      subjects: await getSubjects(),
+      subjects: await getVotedSubjects(),
     }
   },
   methods: {
@@ -44,20 +44,6 @@ export default {
   },
 }
 
-// Subjects を全て取得する
-async function getSubjects() {
-  return await db
-    .collection("subjects")
-    .get()
-    .then((snapshot) => {
-      return convertToSubjectsListFromSubjectsCollection(snapshot)
-    })
-    .catch((err) => {
-      console.log("Error getting documents", err)
-    })
-}
-
-// WIP
 // 自分が投稿した質問を配列で返す
 function getVotedSubjects() {
   return new Promise((resolve) => {
@@ -75,7 +61,6 @@ function getVotedSubjects() {
   })
 }
 
-// WIP
 // 自分が作成した質問を配列で返す
 function getCreatedSubjects() {
   return new Promise((resolve) => {
