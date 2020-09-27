@@ -81,36 +81,40 @@ async function getSubjects() {
         "end ============================================================================"
       )
 
-      const subjects = []
-      if (snapshot.empty) {
-        console.log("Nomatching documents.")
-        subjects.push({
-          id: "",
-          title: "見つかりませんでした",
-          authId: "",
-          isPublic: "",
-          isCloseVoted: "",
-          visibleOrder: "",
-          createdAt: "",
-        })
-      } else {
-        snapshot.forEach((doc) => {
-          const params = doc.data()
-          subjects.push({
-            id: doc.id,
-            title: params.title,
-            authId: params.authId,
-            isPublic: params.isPublic,
-            isCloseVoted: params.isCloseVoted,
-            visibleOrder: params.visibleOrder,
-            createdAt: params.createdAt,
-          })
-        })
-      }
-      return subjects
+      return convertToSubjectsArray(snapshot)
     })
     .catch((err) => {
       console.log("Error getting documents", err)
     })
+}
+
+function convertToSubjectsArray(snapshot) {
+  const subjects = []
+  if (snapshot.empty) {
+    console.log("No matching documents.")
+    subjects.push({
+      id: "",
+      title: "見つかりませんでした",
+      authId: "",
+      isPublic: "",
+      isCloseVoted: "",
+      visibleOrder: "",
+      createdAt: "",
+    })
+  } else {
+    snapshot.forEach((doc) => {
+      const params = doc.data()
+      subjects.push({
+        id: doc.id,
+        title: params.title,
+        authId: params.authId,
+        isPublic: params.isPublic,
+        isCloseVoted: params.isCloseVoted,
+        visibleOrder: params.visibleOrder,
+        createdAt: params.createdAt,
+      })
+    })
+  }
+  return subjects
 }
 </script>
