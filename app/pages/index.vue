@@ -25,6 +25,8 @@
 <script>
 import firebase from "@/plugins/firebase"
 const db = firebase.firestore()
+// 匿名認証でログイン
+firebase.auth().signInAnonymously()
 
 export default {
   async asyncData() {
@@ -48,7 +50,7 @@ async function getSubjects() {
     .collection("subjects")
     .get()
     .then((snapshot) => {
-      return convertToSubjectsArray(snapshot)
+      return convertToSubjectsListFromSubjectsCollection(snapshot)
     })
     .catch((err) => {
       console.log("Error getting documents", err)
@@ -72,20 +74,24 @@ async function getVotedSubjects() {
 
 // WIP
 // 自分が作成した質問を配列で返す
-async function getCreatedSubjects() {
-  return await db
-    .collection("subjects")
-    .get()
-    .then((snapshot) => {
-      return convertToSubjectsArray(snapshot)
+function getCreatedSubjects() {
+  return new Promise((resolve) => {
+    firebase.auth().onAuthStateChanged((user) => {
+      db.collection("subjects")
+        .where("authId", "==", user.uid)
+        .get()
+        .then((snapshot) => {
+          resolve(convertToSubjectsListFromSubjectsCollection(snapshot))
+        })
+        .catch((err) => {
+          console.log("Error getting documents", err)
+        })
     })
-    .catch((err) => {
-      console.log("Error getting documents", err)
-    })
+  })
 }
 
 // firestore から取得したレコードを質問配列へと変換する
-function convertToSubjectsArray(snapshot) {
+function convertToSubjectsListFromSubjectsCollection(snapshot) {
   const subjects = []
   if (snapshot.empty) {
     console.log("No matching documents.")
