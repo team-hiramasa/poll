@@ -3,22 +3,14 @@
     <v-app-bar fixed app>
       <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
         <v-tabs-slider />
-        <v-tab
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          v-text="item.title"
-        />
+        <v-tab @click="fetchVoted">
+          回答した質問
+        </v-tab>
+        <v-tab @click="fetchCreated">
+          作成した質問
+        </v-tab>
       </v-tabs>
     </v-app-bar>
-    <v-tabs-items>
-      <v-tab-item
-        v-for="(item, i) in items"
-        :key="i"
-        :to="item.to"
-        v-text="item.title"
-      />
-    </v-tabs-items>
     <v-list>
       <v-list-item
         v-for="(subject, index) in subjects"
@@ -47,22 +39,14 @@ export default {
   data() {
     return {
       counter: 0,
-      items: [
-        {
-          title: "回答した質問",
-          to: "/#voted",
-        },
-        {
-          title: "作成した質問",
-          to: "/#created",
-        },
-      ],
     }
   },
   methods: {
     countUp() {
       this.counter += 1
     },
+    fetchVoted: getVotedSubjects(),
+    fetchCreated: getSubjects(),
   },
 }
 
@@ -81,6 +65,21 @@ async function getSubjects() {
         "end ============================================================================"
       )
 
+      return convertToSubjectsArray(snapshot)
+    })
+    .catch((err) => {
+      console.log("Error getting documents", err)
+    })
+}
+
+// WIP
+// 自分が投稿した質問を配列で返す
+async function getVotedSubjects() {
+  return await db
+    .collection("subjects")
+    .where("authId", "==", "1q2a3s45dtuvybiunoip")
+    .get()
+    .then((snapshot) => {
       return convertToSubjectsArray(snapshot)
     })
     .catch((err) => {
