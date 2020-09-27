@@ -19,10 +19,6 @@
         v-text="subject.title"
       />
     </v-list>
-    <p>{{ counter }}</p>
-    <button @click="countUp">
-      COUNN UP
-    </button>
   </v-app>
 </template>
 
@@ -36,15 +32,7 @@ export default {
       subjects: await getSubjects(),
     }
   },
-  data() {
-    return {
-      counter: 0,
-    }
-  },
   methods: {
-    countUp() {
-      console.log("Click NOW!!1")
-      this.counter += 1
     },
     fetchVoted: getVotedSubjects(),
     fetchCreated: getSubjects(),
@@ -57,16 +45,6 @@ async function getSubjects() {
     .collection("subjects")
     .get()
     .then((snapshot) => {
-      console.log(
-        "startGetSubjects ==============================================================="
-      )
-      snapshot.forEach((doc) => {
-        console.log(doc.id, "=>", doc.data())
-      })
-      console.log(
-        "end ============================================================================"
-      )
-
       return convertToSubjectsArray(snapshot)
     })
     .catch((err) => {
