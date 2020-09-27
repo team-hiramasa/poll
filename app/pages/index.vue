@@ -33,9 +33,12 @@ export default {
     }
   },
   methods: {
+    async fetchVoted() {
+      this.subjects = await getVotedSubjects()
     },
-    fetchVoted: getVotedSubjects(),
-    fetchCreated: getSubjects(),
+    async fetchCreated() {
+      this.subjects = await getCreatedSubjects()
+    },
   },
 }
 
@@ -58,6 +61,20 @@ async function getVotedSubjects() {
   return await db
     .collection("subjects")
     .where("authId", "==", "1q2a3s45dtuvybiunoip")
+    .get()
+    .then((snapshot) => {
+      return convertToSubjectsArray(snapshot)
+    })
+    .catch((err) => {
+      console.log("Error getting documents", err)
+    })
+}
+
+// WIP
+// 自分が作成した質問を配列で返す
+async function getCreatedSubjects() {
+  return await db
+    .collection("subjects")
     .get()
     .then((snapshot) => {
       return convertToSubjectsArray(snapshot)
