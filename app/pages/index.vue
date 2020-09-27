@@ -50,6 +50,7 @@ export default {
   },
 }
 
+// Subjects を全て取得する
 async function getSubjects() {
   return await db
     .collection("subjects")
@@ -87,6 +88,7 @@ async function getVotedSubjects() {
     })
 }
 
+// firestore から取得したレコードを質問配列へと変換する
 function convertToSubjectsArray(snapshot) {
   const subjects = []
   if (snapshot.empty) {
