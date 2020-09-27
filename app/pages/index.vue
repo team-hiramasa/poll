@@ -1,95 +1,116 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
-      <div class="text-center">
-        <logo />
-        <vuetify-logo />
-      </div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>
-            Vuetify is a progressive Material Design component framework for
-            Vue.js. It was designed to empower developers to create amazing
-            applications.
-          </p>
-          <p>
-            For more information on Vuetify, check out the
-            <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation </a
-            >.
-          </p>
-          <p>
-            If you have questions, please join the official
-            <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord </a
-            >.
-          </p>
-          <p>
-            Find a bug? Report it on the github
-            <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board </a
-            >.
-          </p>
-          <p>
-            Thank you for developing with Vuetify and I look forward to bringing
-            more exciting features in the future.
-          </p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3" />
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br />
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" nuxt to="/inspire">
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-flex>
-  </v-layout>
+  <v-app>
+    <v-app-bar fixed app>
+      <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
+        <v-tabs-slider />
+        <v-tab
+          v-for="(item, i) in items"
+          :key="i"
+          :to="item.to"
+          v-text="item.title"
+        />
+      </v-tabs>
+    </v-app-bar>
+    <v-tabs-items>
+      <v-tab-item
+        v-for="(item, i) in items"
+        :key="i"
+        :to="item.to"
+        v-text="item.title"
+      />
+    </v-tabs-items>
+    <v-list>
+      <v-list-item
+        v-for="(subject, index) in subjects"
+        :key="index"
+        :to="subject.id"
+        v-text="subject.title"
+      />
+    </v-list>
+    <p>{{ counter }}</p>
+    <button @click="countUp">
+      COUNN UP
+    </button>
+  </v-app>
 </template>
 
 <script>
-import Logo from "~/components/Logo.vue"
-import VuetifyLogo from "~/components/VuetifyLogo.vue"
+import firebase from "@/plugins/firebase"
+const db = firebase.firestore()
 
 export default {
-  components: {
-    Logo,
-    VuetifyLogo,
+  async asyncData() {
+    return {
+      subjects: await getSubjects(),
+    }
   },
+  data() {
+    return {
+      counter: 0,
+      items: [
+        {
+          title: "回答した質問",
+          to: "/#voted",
+        },
+        {
+          title: "作成した質問",
+          to: "/#created",
+        },
+      ],
+    }
+  },
+  methods: {
+    countUp() {
+      this.counter += 1
+    },
+  },
+}
+
+async function getSubjects() {
+  return await db
+    .collection("subjects")
+    .get()
+    .then((snapshot) => {
+      console.log(
+        "startGetSubjects ==============================================================="
+      )
+      snapshot.forEach((doc) => {
+        console.log(doc.id, "=>", doc.data())
+      })
+      console.log(
+        "end ============================================================================"
+      )
+
+      const subjects = []
+      if (snapshot.empty) {
+        console.log("Nomatching documents.")
+        subjects.push({
+          id: "",
+          title: "見つかりませんでした",
+          authId: "",
+          isPublic: "",
+          isCloseVoted: "",
+          visibleOrder: "",
+          createdAt: "",
+        })
+      } else {
+        snapshot.forEach((doc) => {
+          const params = doc.data()
+          subjects.push({
+            id: doc.id,
+            title: params.title,
+            authId: params.authId,
+            isPublic: params.isPublic,
+            isCloseVoted: params.isCloseVoted,
+            visibleOrder: params.visibleOrder,
+            createdAt: params.createdAt,
+          })
+        })
+      }
+      return subjects
+    })
+    .catch((err) => {
+      console.log("Error getting documents", err)
+    })
 }
 </script>
