@@ -14,7 +14,7 @@
       />
 
       <v-textarea
-        name="input-7-1"
+        name="choicesList"
         label="回答"
         value=""
         hint="改行で選択肢になります。"
@@ -36,8 +36,6 @@
         <v-switch v-model="isPublic" :label="`${isPublicMessage(isPublic)}`" />
       </div>
 
-      <!-- 公開しない／公開する -->
-
       <div>
         投票結果の票数を表示するかどうか
         <v-switch
@@ -45,8 +43,6 @@
           :label="`${isCloseVotedMessage(isCloseVoted)}`"
         />
       </div>
-      <!-- 公開しない／公開する -->
-      <!-- 投票結果を何位まで表示するか -->
       <v-select
         v-model="visibleOrder"
         :items="items"
@@ -64,7 +60,7 @@
 export default {
   data: () => ({
     title: "",
-    choiceList: "",
+    choicesList: "",
     isPublic: true,
     isCloseVoted: true,
     visibleOrder: 1,
@@ -82,9 +78,9 @@ export default {
 
     isCloseVotedMessage(value) {
       if (value) {
-        return "公開する"
+        return "表示する"
       } else {
-        return "公開しない"
+        return "表示しない"
       }
     },
   },
