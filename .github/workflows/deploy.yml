@@ -27,14 +27,14 @@ jobs:
            yarn install
            yarn build --if-present
       env:
-        APP_apiKey: ${{ secrets.APP_apiKey }}
-        APP_authDomain: ${{ secrets.APP_authDomain }}
-        APP_databaseURL: ${{ secrets.APP_databaseURL }}
-        APP_projectId: ${{ secrets.APP_projectId }}
-        APP_storageBucket: ${{ secrets.APP_storageBucket }}
-        APP_messagingSenderId: ${{ secrets.APP_messagingSenderId }}
-        APP_appId: ${{ secrets.APP_appId }}
-        APP_measurementId: ${{ secrets.APP_measurementId }}
+        FB_API_KEY: ${{ secrets.FB_API_KEY }}
+        FB_AUTH_DOMAIN: ${{ secrets.FB_AUTH_DOMAIN }}
+        FB_DATABASE_URL: ${{ secrets.FB_DATABASE_URL }}
+        FB_PROJECT_ID: ${{ secrets.FB_PROJECT_ID }}
+        FB_STORAGE_BUCKET: ${{ secrets.FB_STORAGE_BUCKET }}
+        FB_MESSAGING_SENDER_ID: ${{ secrets.FB_MESSAGING_SENDER_ID }}
+        FB_APP_ID: ${{ secrets.FB_APP_ID }}
+        FB_MEASUREMENT_ID: ${{ secrets.FB_MEASUREMENT_ID }}
     - name: Firebase-tools install
       run: npm install -g firebase-tools
     - name: Deploy to Firebase Hosting
