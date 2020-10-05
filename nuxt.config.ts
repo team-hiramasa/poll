@@ -94,6 +94,9 @@ const config: Configuration = {
     FB_APP_ID: process.env.FB_APP_ID,
     FB_MEASUREMENT_ID: process.env.FB_MEASUREMENT_ID,
   },
+  router: {
+    middleware: "auth",
+  },
 }
 
 export default config
