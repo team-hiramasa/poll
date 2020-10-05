@@ -12,8 +12,12 @@
       </v-tabs>
     </v-app-bar>
     <v-list>
+      <v-list-item v-if="subjects.length === 0">
+        質問はありません
+      </v-list-item>
       <v-list-item
         v-for="(subject, index) in subjects"
+        v-else
         :key="index"
         :to="subject.id"
         v-text="subject.title"
@@ -79,16 +83,7 @@ async function fetchSubjectsList(user, type) {
 function convertToSubjectsList(snapshot, type) {
   if (snapshot.empty) {
     console.log("No matching documents.")
-    return [
-      {
-        title: "見つかりませんでした",
-        subjectId: "",
-        optionId: "",
-        authId: "",
-        comment: "",
-        createdAt: "",
-      },
-    ]
+    return []
   } else if (type === "votes") {
     return convertToSubjectsListFromVotesCollection(snapshot)
   } else if (type === "subjects") {
