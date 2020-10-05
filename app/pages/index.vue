@@ -44,97 +44,91 @@ export default {
 }
 
 // 自分が投稿した質問を配列で返す
-function getVotedSubjects() {
-  return new Promise((resolve) => {
-    firebase.auth().onAuthStateChanged((user) => {
-      db.collection("votes")
-        .where("authId", "==", user.uid)
-        .get()
-        .then((snapshot) => {
-          resolve(convertToSubjectsListFromVotesCollection(snapshot))
-        })
-        .catch((err) => {
-          console.log("Error getting documents", err)
-        })
-    })
+async function getVotedSubjects() {
+  let result = null
+  await firebase.auth().onAuthStateChanged((user) => {
+    result = fetchSubjectsList(user, "votes")
   })
+  return result
 }
 
 // 自分が作成した質問を配列で返す
-function getCreatedSubjects() {
-  return new Promise((resolve) => {
-    firebase.auth().onAuthStateChanged((user) => {
-      db.collection("subjects")
-        .where("authId", "==", user.uid)
-        .get()
-        .then((snapshot) => {
-          resolve(convertToSubjectsListFromSubjectsCollection(snapshot))
-        })
-        .catch((err) => {
-          console.log("Error getting documents", err)
-        })
-    })
+async function getCreatedSubjects() {
+  let result = null
+  await firebase.auth().onAuthStateChanged((user) => {
+    result = fetchSubjectsList(user, "subjects")
   })
+  return result
+}
+
+// firebase から質問一覧を取得して配列に変換して返す
+async function fetchSubjectsList(user, type) {
+  return await db
+    .collection(type)
+    .where("authId", "==", user.uid)
+    .get()
+    .then((snapshot) => {
+      return convertToSubjectsList(snapshot, type)
+    })
+    .catch((err) => {
+      console.log("Error getting documents", err)
+    })
+}
+
+// タイプによって適切な変換する
+function convertToSubjectsList(snapshot, type) {
+  if (snapshot.empty) {
+    console.log("No matching documents.")
+    return [
+      {
+        title: "見つかりませんでした",
+        subjectId: "",
+        optionId: "",
+        authId: "",
+        comment: "",
+        createdAt: "",
+      },
+    ]
+  } else if (type === "votes") {
+    return convertToSubjectsListFromVotesCollection(snapshot)
+  } else if (type === "subjects") {
+    return convertToSubjectsListFromSubjectsCollection(snapshot)
+  }
 }
 
 // votes コレクションから取得したレコードを質問配列へと変換する
 function convertToSubjectsListFromVotesCollection(snapshot) {
   const subjects = []
-  if (snapshot.empty) {
-    console.log("No matching documents.")
+  snapshot.forEach((doc) => {
+    const params = doc.data()
     subjects.push({
-      title: "見つかりませんでした",
-      subjectId: "",
-      optionId: "",
-      authId: "",
-      comment: "",
-      createdAt: "",
+      id: doc.id,
+      title: params.questionTitle,
+      subjectId: params.subjectId,
+      optionId: params.optionId,
+      authId: params.authId,
+      comment: params.comment,
+      createdAt: params.createdAt,
     })
-  } else {
-    snapshot.forEach((doc) => {
-      const params = doc.data()
-      subjects.push({
-        id: doc.id,
-        title: params.questionTitle,
-        subjectId: params.subjectId,
-        optionId: params.optionId,
-        authId: params.authId,
-        comment: params.comment,
-        createdAt: params.createdAt,
-      })
-    })
-  }
+  })
   return subjects
 }
 
 // firestore から取得したレコードを質問配列へと変換する
 function convertToSubjectsListFromSubjectsCollection(snapshot) {
   const subjects = []
-  if (snapshot.empty) {
-    console.log("No matching documents.")
+  snapshot.forEach((doc) => {
+    const params = doc.data()
     subjects.push({
-      id: "",
-      title: "見つかりませんでした",
-      authId: "",
-      isPublic: "",
-      isCloseVoted: "",
-      visibleOrder: "",
-      createdAt: "",
+      id: doc.id,
+      title: params.title,
+      authId: params.authId,
+      isPublic: params.isPublic,
+      isCloseVoted: params.isCloseVoted,
+      visibleOrder: params.visibleOrder,
+      createdAt: params.createdAt,
     })
-  } else {
-    snapshot.forEach((doc) => {
-      const params = doc.data()
-      subjects.push({
-        id: doc.id,
-        title: params.title,
-        authId: params.authId,
-        isPublic: params.isPublic,
-        isCloseVoted: params.isCloseVoted,
-        visibleOrder: params.visibleOrder,
-        createdAt: params.createdAt,
-      })
-    })
-  }
+  })
   return subjects
 }
 </script>
