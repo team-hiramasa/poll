@@ -1,13 +1,11 @@
 import firebase from "~/plugins/firebase.ts"
-export default function ({ _ }) {
-  firebase.auth().onAuthStateChanged(function (user) {
-    if (!user) {
-      firebase
-        .auth()
-        .signInAnonymously()
-        .catch(function (error) {
-          console.log(error)
-        })
-    }
+// TODO: あとで綺麗に書き直す
+export default async function ({ _ }) {
+  let isAuthed = false
+  await firebase.auth().onAuthStateChanged((user) => {
+    isAuthed = !!user
   })
+  if (!isAuthed) {
+    await firebase.auth().signInAnonymously()
+  }
 }
