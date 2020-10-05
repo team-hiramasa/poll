@@ -25,8 +25,6 @@
 <script>
 import firebase from "@/plugins/firebase"
 const db = firebase.firestore()
-// 匿名認証でログイン
-firebase.auth().signInAnonymously()
 
 export default {
   async asyncData() {
