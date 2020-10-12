@@ -36,6 +36,16 @@ export default {
       subjects: await getVotedSubjects(),
     }
   },
+  data() {
+    return {
+      tab: {
+        // 投票済みは votes コレクションから取得する
+        voted: "votes",
+        // 作成した質問は subjects コレクションから取得する
+        created: "subjects",
+      },
+    }
+  },
   methods: {
     async fetchVoted() {
       this.subjects = await getVotedSubjects()
@@ -51,7 +61,7 @@ export default {
 async function getVotedSubjects() {
   let result = null
   await firebase.auth().onAuthStateChanged((user) => {
-    result = fetchSubjectsList(user, "votes")
+    result = fetchSubjectsList(user, this.tab.voted)
   })
   return result
 }
@@ -60,7 +70,7 @@ async function getVotedSubjects() {
 async function getCreatedSubjects() {
   let result = null
   await firebase.auth().onAuthStateChanged((user) => {
-    result = fetchSubjectsList(user, "subjects")
+    result = fetchSubjectsList(user, this.tab.created)
   })
   return result
 }
@@ -84,9 +94,9 @@ function convertToSubjectsList(snapshot, type) {
   if (snapshot.empty) {
     console.log("No matching documents.")
     return []
-  } else if (type === "votes") {
+  } else if (type === this.tab.voted) {
     return convertToSubjectsListFromVotesCollection(snapshot)
-  } else if (type === "subjects") {
+  } else if (type === this.tab.created) {
     return convertToSubjectsListFromSubjectsCollection(snapshot)
   }
 }
