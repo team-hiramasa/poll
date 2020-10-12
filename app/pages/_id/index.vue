@@ -4,14 +4,19 @@
     質問：{{ title }}<br />
     <form>
       <ul>
-        <li v-for="option in options" :key="option.title" class="list-option">
-          <input name="option" type="radio" />{{ option.title }}
+        <li v-for="option in options" :key="option.id" class="list-option">
+          <input
+            v-model="checkedOption"
+            name="option"
+            type="radio"
+            :value="option.id"
+          />{{ option.title }}
         </li>
       </ul>
     </form>
-    <div>
+    <div class="comment">
       コメント(任意)<br />
-      <input type="text" />
+      <textarea v-model="voteComment" row="5" />
     </div>
     <button class="button-vote" @click="vote">
       投票する
@@ -28,27 +33,32 @@ export default {
   async asyncData({ params }) {
     const subjectId = params.id
     return {
-      title: await getTitle(subjectId),
+      checkedOption: "",
       options: await getOptions(subjectId),
+      title: await getTitle(subjectId),
+      voteComment: "",
     }
   },
   methods: {
     // 投票する
-    vote: () => {
-      const checkedOption = document.querySelector("input[name=option]:checked")
-      let checkedLabel = ""
-      if (checkedOption) {
-        const nextDOM = checkedOption.nextSibling
-        if (nextDOM) {
-          checkedLabel = nextDOM.textContent.replace(/(^\s+)|(\s+$)/g, "")
+    vote() {
+      // 選択されている選択肢のIDを取得
+      // TODO: 空の場合メッセージ出して終わる
+      const checkedId = this.checkedOption
+      if (checkedId) {
+        // Firebaseの"votes"コレクションに新しいドキュメントを作り投票する
+        // TODO: 同じsubjectId・authIdで既存なら、addではなく更新にする
+        const newVote = {
+          authId: firebase.auth().currentUser.uid,
+          comment: this.voteComment,
+          createdAt: new Date(),
+          optionId: checkedId,
+          questionTitle: this.title,
+          subjectId: this.$route.params.id,
         }
-      }
-      if (checkedLabel) {
-        console.log("TODO: 「" + checkedLabel + "」に投票する")
-        // WIP
-        // Firebaseの"votes"コレクションに新しいドキュメントを作り
-        // 下記フィールドの値を入力する
-        // authId, comment, createdAt, optionId, questionTitle, subjectId
+        // console.log(newVote) // productionではコメント化
+        db.collection("votes").add(newVote)
+        alert("投票完了") // TODO: 投票後の画面に推移する
       }
     },
   },
@@ -79,15 +89,16 @@ async function getOptions(subjectId) {
     .catch(function (error) {
       console.log("Error getting documents: ", error)
     })
-  const data = []
+  const returnObject = []
   querySnapshot.forEach(function (doc) {
-    data.push({ title: doc.data().title })
+    const data = doc.data()
+    returnObject.push({ id: doc.id, title: data.title })
   })
-  return data
+  return returnObject
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .button-vote {
   background-color: white;
   border-radius: 0.2em;
@@ -96,5 +107,11 @@ async function getOptions(subjectId) {
 }
 .list-option {
   list-style-type: none;
+}
+.comment {
+  textarea {
+    background-color: white;
+    color: black;
+  }
 }
 </style>
