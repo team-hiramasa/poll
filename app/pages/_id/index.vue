@@ -33,12 +33,14 @@ export default {
   async asyncData({ params }) {
     const subjectId = params.id
     return {
-      checkedOption: "",
       options: await getOptions(subjectId),
       title: await getTitle(subjectId),
-      voteComment: "",
     }
   },
+  data: () => ({
+    checkedOption: "",
+    voteComment: "",
+  }),
   methods: {
     // 投票する
     vote() {
