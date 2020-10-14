@@ -14,23 +14,18 @@
       />
 
       <v-textarea
-        name="choicesList"
+        v-model="optionList"
         label="回答"
         value=""
         hint="改行で選択肢になります。"
       />
-      <div>
-        サッカー
-      </div>
-      <div>
-        野球
-      </div>
-      <div>
-        バスケ
-      </div>
-      <div>
-        テニス
-      </div>
+
+      <v-textarea
+        v-model="optionListExample"
+        label="入力例"
+        value=""
+        disabled
+      />
       <div>
         投票結果をすぐに公開するかどうか
         <v-switch v-model="isPublic" :label="`${isPublicMessage(isPublic)}`" />
@@ -55,16 +50,39 @@
 </template>
 
 <script>
-// import firebase from "@/plugins/firebase";
-// const db = firebase.firestore();
+import firebase from "@/plugins/firebase"
+const db = firebase.firestore()
+
+// options取得
+
+// subject取得
+const subjectRef = db.collection("subjects").doc("SF")
+
+subjectRef
+  .get()
+  .then(function (doc) {
+    if (doc.exists) {
+      console.log("Document data:", doc.data())
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!")
+    }
+  })
+  .catch(function (error) {
+    console.log("Error getting document:", error)
+  })
+
+// 取得したoptionをテキストに変換
+
 export default {
   data: () => ({
     title: "",
-    choicesList: "",
+    optionList: "",
     isPublic: true,
     isCloseVoted: true,
     visibleOrder: 1,
     items: ["1", "2", "3"],
+    optionListExample: "サッカー\n野球\nバスケ\nテニス",
   }),
 
   methods: {
