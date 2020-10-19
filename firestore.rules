@@ -13,6 +13,8 @@ service cloud.firestore {
     // your rules
     match /{document=**} {
       allow read, write: if request.time < timestamp.date(2020, 8, 22);
+      allow read, write: if request.auth != null;
+      allow read: if request.auth = null;
     }
   }
 }
