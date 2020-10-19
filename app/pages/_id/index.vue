@@ -1,26 +1,35 @@
 <template>
   <div>
-    質問に投票する<br /><br />
-    質問：{{ title }}<br />
-    <form>
+    <div v-if="modeVote === true" class="vote">
+      質問に投票する<br /><br />
+      <form>
+        <ul>
+          <li v-for="option in options" :key="option.id" class="list-option">
+            <input
+              v-model="checkedOption"
+              name="option"
+              type="radio"
+              :value="option.id"
+            />{{ option.title }}
+          </li>
+        </ul>
+      </form>
+      <div class="comment">
+        コメント(任意)<br />
+        <textarea v-model="voteComment" row="5" />
+      </div>
+      <button class="button-vote" @click="vote">
+        投票する
+      </button>
+    </div>
+    <div v-else class="result">
+      投票結果<br /><br />
       <ul>
         <li v-for="option in options" :key="option.id" class="list-option">
-          <input
-            v-model="checkedOption"
-            name="option"
-            type="radio"
-            :value="option.id"
-          />{{ option.title }}
+          {{ option.title }}
         </li>
       </ul>
-    </form>
-    <div class="comment">
-      コメント(任意)<br />
-      <textarea v-model="voteComment" row="5" />
     </div>
-    <button class="button-vote" @click="vote">
-      投票する
-    </button>
   </div>
 </template>
 
@@ -32,13 +41,16 @@ const db = firebase.firestore()
 export default {
   async asyncData({ params }) {
     const subjectId = params.id
+    const questionData = await getQuestionData(subjectId)
     return {
-      options: await getOptions(subjectId),
-      title: await getTitle(subjectId),
+      isPublic: questionData.isPublic,
+      options: questionData.options,
+      title: questionData.title,
     }
   },
   data: () => ({
     checkedOption: "",
+    modeVote: true,
     voteComment: "",
   }),
   methods: {
@@ -59,15 +71,17 @@ export default {
           subjectId: this.$route.params.id,
         }
         // console.log(newVote) // productionではコメント化
+
+        // 投票
         db.collection("votes").add(newVote)
-        alert("投票完了") // TODO: 投票後の画面に推移する
+        alert("投票完了")
       }
     },
   },
 }
 
-// 質問のタイトルを取得する
-async function getTitle(subjectId) {
+// 質問の情報・選択肢をまとめて取得する
+async function getQuestionData(subjectId) {
   const doc = await db
     .collection("subjects")
     .doc(subjectId)
@@ -75,15 +89,16 @@ async function getTitle(subjectId) {
     .catch(function (error) {
       console.log("Error getting documents: ", error)
     })
-  if (doc.exists) {
-    return doc.data().title
-  } else {
-    console.log("No document")
-  }
-}
 
-// 質問の選択肢を取得する
-async function getOptions(subjectId) {
+  // 存在しないIDの質問がリクエストされた場合、トップに戻る
+  if (!doc.exists) {
+    location.href = "/"
+  }
+
+  // 質問の情報を取得
+  const docData = doc.data()
+
+  // 質問の選択肢を取得
   const querySnapshot = await db
     .collection("options")
     .where("subjectId", "==", subjectId)
@@ -91,29 +106,39 @@ async function getOptions(subjectId) {
     .catch(function (error) {
       console.log("Error getting documents: ", error)
     })
-  const returnObject = []
+  const optionsAry = []
   querySnapshot.forEach(function (doc) {
     const data = doc.data()
-    returnObject.push({ id: doc.id, title: data.title })
+    optionsAry.push({ id: doc.id, title: data.title })
   })
-  return returnObject
+
+  return {
+    isPublic: docData.isPublic,
+    options: optionsAry,
+    title: docData.title,
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-.button-vote {
-  background-color: white;
-  border-radius: 0.2em;
-  color: black;
-  padding: 0.2em 0.5em;
-}
-.list-option {
-  list-style-type: none;
-}
-.comment {
-  textarea {
+.vote {
+  .button-vote {
     background-color: white;
+    border-radius: 0.2em;
     color: black;
+    padding: 0.2em 0.5em;
   }
+  .list-option {
+    list-style-type: none;
+  }
+  .comment {
+    textarea {
+      background-color: white;
+      color: black;
+    }
+  }
+}
+
+.result {
 }
 </style>
