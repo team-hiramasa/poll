@@ -74,7 +74,13 @@ export default {
 
         // 投票
         db.collection("votes").add(newVote)
-        alert("投票完了")
+
+        if (this.isPublic) {
+          // WIP ここで投票結果を取得し、表示内容を準備する
+          this.modeVote = false // 投票結果を表示
+        } else {
+          location.href = "/" // トップ（投票一覧）に戻る
+        }
       }
     },
   },
