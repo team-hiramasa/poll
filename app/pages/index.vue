@@ -94,43 +94,34 @@ function convertToSubjectsList(snapshot, type) {
     console.log("No matching documents.")
     return []
   } else if (type === this.tab.voted) {
-    return convertToSubjectsListFromVotesCollection(snapshot)
+    return subjectsListFromVotesCollection(snapshot)
   } else if (type === this.tab.created) {
-    return convertToSubjectsListFromSubjectsCollection(snapshot)
+    return subjectsListFromSubjectsCollection(snapshot)
   }
 }
 
 // votes コレクションから取得したレコードを質問配列へと変換する
-function convertToSubjectsListFromVotesCollection(snapshot) {
+function subjectsListFromVotesCollection(snapshot) {
   const subjects = []
   snapshot.forEach((doc) => {
     const params = doc.data()
     subjects.push({
-      id: doc.id,
+      id: params.subjectId,
       title: params.questionTitle,
-      subjectId: params.subjectId,
-      optionId: params.optionId,
-      authId: params.authId,
-      comment: params.comment,
-      createdAt: params.createdAt,
+      ...params,
     })
   })
   return subjects
 }
 
 // firestore から取得したレコードを質問配列へと変換する
-function convertToSubjectsListFromSubjectsCollection(snapshot) {
+function subjectsListFromSubjectsCollection(snapshot) {
   const subjects = []
   snapshot.forEach((doc) => {
     const params = doc.data()
     subjects.push({
-      id: doc.subjectId,
-      title: params.title,
-      authId: params.authId,
-      isPublic: params.isPublic,
-      isCloseVoted: params.isCloseVoted,
-      visibleOrder: params.visibleOrder,
-      createdAt: params.createdAt,
+      id: doc.id,
+      ...params,
     })
   })
   return subjects
