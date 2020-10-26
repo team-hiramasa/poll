@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="modeVote === true" class="vote">
+    <div v-if="showResult === false" class="vote">
       質問に投票する<br /><br />
       <form>
         <ul>
@@ -26,9 +26,12 @@
       投票結果<br /><br />
       <ul>
         <li v-for="option in options" :key="option.id" class="list-option">
-          {{ option.title }}
+          {{ option.title }}（{{ voteScores[option.id] }}）
         </li>
       </ul>
+      <!-- TODO: 下記リンク先を画面遷移なしで出来ればそうする -->
+      <a href="">投票し直す</a><br />
+      <a href="/">トップに戻る</a>
     </div>
   </div>
 </template>
@@ -50,7 +53,8 @@ export default {
   },
   data: () => ({
     checkedOption: "",
-    modeVote: true,
+    voteScores: {},
+    showResult: false,
     voteComment: "",
   }),
   methods: {
@@ -61,7 +65,7 @@ export default {
       const checkedId = this.checkedOption
       if (checkedId) {
         // Firebaseの"votes"コレクションに新しいドキュメントを作り投票する
-        // TODO: 同じsubjectId・authIdで既存なら、addではなく更新にする
+        // TODO: 同じsubjectId・authIdで投票済みなら、addではなく更新にする
         const newVote = {
           authId: firebase.auth().currentUser.uid,
           comment: this.voteComment,
@@ -72,15 +76,38 @@ export default {
         }
         // console.log(newVote) // productionではコメント化
 
-        // 投票
+        // 投票＆次へ遷移
         db.collection("votes").add(newVote)
-
-        if (this.isPublic) {
-          // WIP ここで投票結果を取得し、表示内容を準備する
-          this.modeVote = false // 投票結果を表示
-        } else {
-          location.href = "/" // トップ（投票一覧）に戻る
-        }
+        this.afterVote()
+      }
+    },
+    // 投票後の遷移
+    afterVote() {
+      if (this.isPublic) {
+        // TODO: この条件の他、質問の作成者の場合もここに来させる
+        // 投票結果を取得＆表示する
+        const objectVotes = {}
+        db.collection("votes")
+          .where("subjectId", "==", this.$route.params.id)
+          .get()
+          .then((docs) => {
+            docs.forEach((doc) => {
+              const optionId = doc.data().optionId
+              if (objectVotes[optionId]) {
+                objectVotes[optionId]++
+              } else {
+                objectVotes[optionId] = 1
+              }
+            })
+            this.voteScores = objectVotes
+            this.showResult = true
+          })
+          .catch((error) => {
+            console.log("[ERROR] in getQuestionData (votes) : ", error)
+          })
+      } else {
+        // トップ（投票一覧）に戻る
+        location.href = "/"
       }
     },
   },
@@ -92,8 +119,8 @@ async function getQuestionData(subjectId) {
     .collection("subjects")
     .doc(subjectId)
     .get()
-    .catch(function (error) {
-      console.log("Error getting documents: ", error)
+    .catch((error) => {
+      console.log("[ERROR] in getting documents: ", error)
     })
 
   // 存在しないIDの質問がリクエストされた場合、トップに戻る
@@ -109,11 +136,11 @@ async function getQuestionData(subjectId) {
     .collection("options")
     .where("subjectId", "==", subjectId)
     .get()
-    .catch(function (error) {
-      console.log("Error getting documents: ", error)
+    .catch((error) => {
+      console.log("[ERROR] in getQuestionData (options) : ", error)
     })
   const optionsAry = []
-  querySnapshot.forEach(function (doc) {
+  querySnapshot.forEach((doc) => {
     const data = doc.data()
     optionsAry.push({ id: doc.id, title: data.title })
   })
@@ -143,8 +170,5 @@ async function getQuestionData(subjectId) {
       color: black;
     }
   }
-}
-
-.result {
 }
 </style>
