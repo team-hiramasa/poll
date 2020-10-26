@@ -59,20 +59,20 @@ export default {
 
 // 自分が投稿した質問を配列で返す
 async function getVotedSubjects() {
-  let result = null
+  let subjectList = null
   await firebase.auth().onAuthStateChanged((user) => {
-    result = fetchSubjectsList(user, this.tab.voted)
+    subjectList = fetchSubjectsList(user, this.tab.voted)
   })
-  return result
+  return subjectList
 }
 
 // 自分が作成した質問を配列で返す
 async function getCreatedSubjects() {
-  let result = null
+  let subjectList = null
   await firebase.auth().onAuthStateChanged((user) => {
-    result = fetchSubjectsList(user, this.tab.created)
+    subjectList = fetchSubjectsList(user, this.tab.created)
   })
-  return result
+  return subjectList
 }
 
 // firebase から質問一覧を取得して配列に変換して返す
