@@ -125,7 +125,7 @@ function convertToSubjectsListFromSubjectsCollection(snapshot) {
   snapshot.forEach((doc) => {
     const params = doc.data()
     subjects.push({
-      id: doc.id,
+      id: doc.subjectId,
       title: params.title,
       authId: params.authId,
       isPublic: params.isPublic,
