@@ -54,7 +54,6 @@ export default {
       this.subjects = await getCreatedSubjects()
     },
   },
-  middleware: "auth",
 }
 
 // 自分が投稿した質問を配列で返す
