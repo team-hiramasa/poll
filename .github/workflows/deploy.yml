@@ -39,7 +39,38 @@ jobs:
       run: npm install -g firebase-tools
     - name: Deploy to Firebase Hosting
       run: |
-        firebase deploy --only hosting --token $FIREBASE_TOKEN --project $PROJECT_ID
+        firebase deploy --only hosting,firestore --force --token $FIREBASE_TOKEN --project $PROJECT_ID
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    - name: Set COMMIT_MESSAGE
+      run: echo ::set-env name=COMMIT_MESSAGE::$(echo "${{ github.event.head_commit.message }}" | tr '\n' ' ')
+    - name: Slack Notification on SUCCESS
+      if: success()
+      uses: tokorom/action-slack-incoming-webhook@master
+      env:
+        INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      with:
+        text: ビルド成功です！やったね！
+        attachments: |
+          [
+            {
+              "color": "good",
+              "author_name": "${{ github.actor }}",
+              "author_icon": "${{ github.event.sender.avatar_url }}",
+              "fields": [
+                {
+                  "title": "Commit Message",
+                  "value": "${{ env.COMMIT_MESSAGE }}"
+                },
+                {
+                  "title": "GitHub Actions URL",
+                  "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+                },
+                {
+                  "title": "アプリURL",
+                  "value": "${{ secrets.APP_URL }}"
+                }
+              ]
+            }
+          ]
