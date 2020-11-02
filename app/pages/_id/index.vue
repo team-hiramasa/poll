@@ -43,12 +43,16 @@ const db = firebase.firestore()
 
 export default {
   async asyncData({ params }) {
-    const subjectId = params.id
-    const questionData = await getQuestionData(subjectId)
+    const currentAuthId = firebase.auth().currentUser.uid
+    const currentSubjectId = params.id
+    const questionData = await getQuestionData(currentAuthId, currentSubjectId)
     return {
+      authId: currentAuthId,
       isPublic: questionData.isPublic,
       options: questionData.options,
+      subjectId: currentSubjectId,
       title: questionData.title,
+      votedDocId: questionData.votedDocId,
     }
   },
   data: () => ({
@@ -64,31 +68,38 @@ export default {
       // TODO: 空の場合メッセージ出して終わる
       const checkedId = this.checkedOption
       if (checkedId) {
-        // Firebaseの"votes"コレクションに新しいドキュメントを作り投票する
-        // TODO: 同じsubjectId・authIdで投票済みなら、addではなく更新にする
-        const newVote = {
-          authId: firebase.auth().currentUser.uid,
-          comment: this.voteComment,
-          createdAt: new Date(),
-          optionId: checkedId,
-          questionTitle: this.title,
-          subjectId: this.$route.params.id,
+        if (this.votedDocId) {
+          // 同じsubjectId・authIdで投票済み. ドキュメントを更新する
+          db.collection("votes").doc(this.votedDocId).set(
+            {
+              comment: this.voteComment,
+              optionId: checkedId,
+            },
+            { merge: true }
+          )
+        } else {
+          // 未投票. "votes"コレクションに新しいドキュメントを作り投票する
+          db.collection("votes").add({
+            authId: this.authId,
+            comment: this.voteComment,
+            createdAt: new Date(),
+            optionId: checkedId,
+            questionTitle: this.title,
+            subjectId: this.subjectId,
+          })
         }
-        // console.log(newVote) // productionではコメント化
-
-        // 投票＆次へ遷移
-        db.collection("votes").add(newVote)
+        // 次へ遷移
         this.afterVote()
       }
     },
     // 投票後の遷移
     afterVote() {
       if (this.isPublic) {
-        // TODO: この条件の他、質問の作成者の場合もここに来させる
         // 投票結果を取得＆表示する
+        // TODO: この条件の他、質問の作成者の場合もここに来させる
         const objectVotes = {}
         db.collection("votes")
-          .where("subjectId", "==", this.$route.params.id)
+          .where("subjectId", "==", this.subjectId)
           .get()
           .then((docs) => {
             docs.forEach((doc) => {
@@ -103,7 +114,7 @@ export default {
             this.showResult = true
           })
           .catch((error) => {
-            console.log("[ERROR] in getQuestionData (votes) : ", error)
+            console.log("[ERROR] in afterVote: ", error)
           })
       } else {
         // トップ（投票一覧）に戻る
@@ -114,7 +125,7 @@ export default {
 }
 
 // 質問の情報・選択肢をまとめて取得する
-async function getQuestionData(subjectId) {
+async function getQuestionData(authId, subjectId) {
   const doc = await db
     .collection("subjects")
     .doc(subjectId)
@@ -137,7 +148,7 @@ async function getQuestionData(subjectId) {
     .where("subjectId", "==", subjectId)
     .get()
     .catch((error) => {
-      console.log("[ERROR] in getQuestionData (options) : ", error)
+      console.log("[ERROR] in getQuestionData (options): ", error)
     })
   const optionsAry = []
   querySnapshot.forEach((doc) => {
@@ -145,10 +156,27 @@ async function getQuestionData(subjectId) {
     optionsAry.push({ id: doc.id, title: data.title })
   })
 
+  // 質問に回答済みか否かを取得
+  const votedSnapshot = await db
+    .collection("votes")
+    .where("authId", "==", authId)
+    .where("subjectId", "==", subjectId)
+    .get()
+    .catch((error) => {
+      console.log("[ERROR] in getQuestionData (votedSnapshot): ", error)
+    })
+  let tmpVotedDocId = null
+  if (votedSnapshot.size > 0) {
+    votedSnapshot.forEach((doc) => {
+      tmpVotedDocId = doc.id
+    })
+  }
+
   return {
     isPublic: docData.isPublic,
     options: optionsAry,
     title: docData.title,
+    votedDocId: tmpVotedDocId,
   }
 }
 </script>
