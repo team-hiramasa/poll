@@ -2,6 +2,7 @@
   <div>
     <div v-if="showResult === false" class="vote">
       質問に投票する<br /><br />
+      {{ title }}
       <form>
         <ul>
           <li v-for="option in options" :key="option.id" class="list-option">
@@ -24,9 +25,14 @@
     </div>
     <div v-else class="result">
       投票結果<br /><br />
-      <ul>
+      <ul v-if="isCloseVoted === true">
         <li v-for="option in options" :key="option.id" class="list-option">
           {{ option.title }}（{{ voteScores[option.id] || 0 }}）
+        </li>
+      </ul>
+      <ul v-else>
+        <li>
+          test
         </li>
       </ul>
       <!-- TODO: 下記リンク先を画面遷移なしで出来ればそうする -->
@@ -46,13 +52,16 @@ export default {
     const currentAuthId = firebase.auth().currentUser.uid
     const currentSubjectId = params.id
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
+    const docData = questionData.subjectData
     return {
       authId: currentAuthId,
-      isMine: questionData.createdMe,
-      isPublic: questionData.isPublic,
+      isCloseVoted: docData.isCloseVoted,
+      isMine: docData.createdMe,
+      isPublic: docData.isPublic,
       options: questionData.options,
       subjectId: currentSubjectId,
-      title: questionData.title,
+      title: docData.title,
+      visibleOrder: docData.visibleOrder,
       votedDocId: questionData.votedDocId,
     }
   },
@@ -95,32 +104,35 @@ export default {
     },
     // 投票後の遷移
     afterVote() {
-      console.log(this.isMine || this.isPublic) // TODO: productionでは無効化
       if (this.isMine || this.isPublic) {
         // 自分の質問 or すぐ結果を表示する設定なら、投票結果を取得＆表示する
-        const objectVotes = {}
-        db.collection("votes")
-          .where("subjectId", "==", this.subjectId)
-          .get()
-          .then((docs) => {
-            docs.forEach((doc) => {
-              const optionId = doc.data().optionId
-              if (objectVotes[optionId]) {
-                objectVotes[optionId]++
-              } else {
-                objectVotes[optionId] = 1
-              }
-            })
-            this.voteScores = objectVotes
-            this.showResult = true
-          })
-          .catch((error) => {
-            console.log("[ERROR] in afterVote: ", error)
-          })
+        this.displayResult()
       } else {
         // トップ（投票一覧）に戻る
         location.href = "/"
       }
+    },
+    // 投票結果を表示
+    displayResult() {
+      const objectVotes = {}
+      db.collection("votes")
+        .where("subjectId", "==", this.subjectId)
+        .get()
+        .then((docs) => {
+          docs.forEach((doc) => {
+            const optionId = doc.data().optionId
+            if (objectVotes[optionId]) {
+              objectVotes[optionId]++
+            } else {
+              objectVotes[optionId] = 1
+            }
+          })
+          this.voteScores = objectVotes
+          this.showResult = true
+        })
+        .catch((error) => {
+          console.log("[ERROR] in afterVote: ", error)
+        })
     },
   },
 }
@@ -175,9 +187,12 @@ async function getQuestionData(authId, subjectId) {
 
   return {
     createdMe: authId === docData.authId,
+    isCloseVoted: docData.isCloseVoted,
     isPublic: docData.isPublic,
     options: optionsAry,
+    subjectData: docData,
     title: docData.title,
+    visibleOrder: docData.visibleOrder,
     votedDocId: tmpVotedDocId,
   }
 }
