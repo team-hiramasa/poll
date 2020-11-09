@@ -48,6 +48,7 @@ export default {
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
     return {
       authId: currentAuthId,
+      isMine: questionData.createdMe,
       isPublic: questionData.isPublic,
       options: questionData.options,
       subjectId: currentSubjectId,
@@ -94,9 +95,9 @@ export default {
     },
     // 投票後の遷移
     afterVote() {
-      if (this.isPublic) {
-        // 投票結果を取得＆表示する
-        // TODO: この条件の他、質問の作成者の場合もここに来させる
+      console.log(this.isMine || this.isPublic) // TODO: productionでは無効化
+      if (this.isMine || this.isPublic) {
+        // 自分の質問 or すぐ結果を表示する設定なら、投票結果を取得＆表示する
         const objectVotes = {}
         db.collection("votes")
           .where("subjectId", "==", this.subjectId)
@@ -173,6 +174,7 @@ async function getQuestionData(authId, subjectId) {
   }
 
   return {
+    createdMe: authId === docData.authId,
     isPublic: docData.isPublic,
     options: optionsAry,
     title: docData.title,
