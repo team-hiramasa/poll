@@ -26,7 +26,7 @@
       投票結果<br /><br />
       <ul>
         <li v-for="option in options" :key="option.id" class="list-option">
-          {{ option.title }}（{{ voteScores[option.id] }}）
+          {{ option.title }}（{{ voteScores[option.id] || 0 }}）
         </li>
       </ul>
       <!-- TODO: 下記リンク先を画面遷移なしで出来ればそうする -->
