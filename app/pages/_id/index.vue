@@ -111,7 +111,7 @@ export default {
     },
 
     // 投票結果を選択肢配列に反映する
-    // TODO: isCloseVoted, visibleOrder の値に応じた結果にする
+    // TODO: isCloseVoted の値に応じた結果にする
     getResult() {
       db.collection("votes")
         .where("subjectId", "==", this.subjectId)
@@ -135,6 +135,24 @@ export default {
           this.options.sort((a, b) => {
             return a.score < b.score
           })
+          // visibleOrderが0より大きければ、結果表示に反映する
+          if (this.visibleOrder > 0) {
+            // 表示用の一時配列を準備
+            const newOptions = []
+            let preScore = null
+            this.options.forEach((option) => {
+              // まず得票数の多い順に、visibleOrderの数だけ選択肢を配列に入れる
+              // さらにvisibleOrder最後と同じ得票数の選択肢があれば、それも配列に入れる
+              if (
+                newOptions.length < this.visibleOrder ||
+                option.score === preScore
+              ) {
+                newOptions.push(option)
+                preScore = option.score
+              }
+            })
+            this.options = newOptions
+          }
         })
         .catch((error) => {
           console.log("[ERROR] in afterVote: ", error)
