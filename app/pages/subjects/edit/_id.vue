@@ -12,32 +12,10 @@
 
 // 取得したoptionをテキストに変換
 
+import EditForm from "~/components/EditForm"
 export default {
-  data: () => ({
-    title: "",
-    choiceList: "",
-    isPublic: true,
-    isCloseVoted: true,
-    visibleOrder: 1,
-    items: ["1", "2", "3"],
-  }),
-
-  methods: {
-    isPublicMessage(value) {
-      if (value) {
-        return "公開する"
-      } else {
-        return "公開しない"
-      }
-    },
-
-    isCloseVotedMessage(value) {
-      if (value) {
-        return "公開する"
-      } else {
-        return "公開しない"
-      }
-    },
+  components: {
+    EditForm,
   },
 }
 </script>
