@@ -29,6 +29,12 @@
 <script>
 import firebase from "@/plugins/firebase"
 const db = firebase.firestore()
+const tab = {
+  // 投票済みは votes コレクションから取得する
+  voted: "votes",
+  // 作成した質問は subjects コレクションから取得する
+  created: "subjects",
+}
 
 export default {
   async asyncData() {
@@ -37,14 +43,7 @@ export default {
     }
   },
   data() {
-    return {
-      tab: {
-        // 投票済みは votes コレクションから取得する
-        voted: "votes",
-        // 作成した質問は subjects コレクションから取得する
-        created: "subjects",
-      },
-    }
+    return {}
   },
   methods: {
     async fetchVoted() {
@@ -60,7 +59,7 @@ export default {
 async function getVotedSubjects() {
   let subjectList = null
   await firebase.auth().onAuthStateChanged((user) => {
-    subjectList = fetchSubjectsList(user, this.tab.voted)
+    subjectList = fetchSubjectsList(user, tab.voted)
   })
   return subjectList
 }
@@ -69,7 +68,7 @@ async function getVotedSubjects() {
 async function getCreatedSubjects() {
   let subjectList = null
   await firebase.auth().onAuthStateChanged((user) => {
-    subjectList = fetchSubjectsList(user, this.tab.created)
+    subjectList = fetchSubjectsList(user, tab.created)
   })
   return subjectList
 }
@@ -93,9 +92,9 @@ function convertToSubjectsList(snapshot, type) {
   if (snapshot.empty) {
     console.log("No matching documents.")
     return []
-  } else if (type === this.tab.voted) {
+  } else if (type === tab.voted) {
     return subjectsListFromVotesCollection(snapshot)
-  } else if (type === this.tab.created) {
+  } else if (type === tab.created) {
     return subjectsListFromSubjectsCollection(snapshot)
   }
 }
