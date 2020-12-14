@@ -24,6 +24,8 @@
 import Vue from "vue"
 import firebase from "@/plugins/firebase"
 import EditForm from "~/components/EditForm.vue"
+const db = firebase.firestore()
+const currentAuthId = firebase.auth().currentUser.uid
 
 export default Vue.extend({
   components: {
@@ -44,12 +46,17 @@ export default Vue.extend({
   },
   methods: {
     createSubject() {
-      const db = firebase.firestore()
       const newSubject = db.collection("subjects")
       const newOptions = db.collection("options")
 
+      db.settings({
+        timestampsInSnapshots: true,
+      })
+
       newSubject
         .add({
+          authId: currentAuthId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           title: this.subject.title,
           isCloseVoted: this.subject.isCloseVoted,
           isPublic: this.subject.isPublic,
@@ -66,12 +73,22 @@ export default Vue.extend({
           console.log("Add ID: ", newSubjectId)
           for (let counter = 0; counter < objectsListArray.length; counter++) {
             if (objectsListArray[counter] !== "") {
-              newOptions.add({
-                subjectId: newSubjectId,
-                title: objectsListArray[counter],
-              })
+              newOptions
+                .add({
+                  subjectId: newSubjectId,
+                  title: objectsListArray[counter],
+                })
+                .catch((error) => {
+                  console.log("[ERROR] in getting documents: ", error)
+                  location.href = "/"
+                })
             }
           }
+          location.href = "/subject/" + newSubjectId
+        })
+        .catch((error) => {
+          console.log("[ERROR] in getting documents: ", error)
+          location.href = "/"
         })
     },
   },
