@@ -25,7 +25,7 @@ import Vue from "vue"
 import firebase from "@/plugins/firebase"
 import EditForm from "~/components/EditForm.vue"
 const db = firebase.firestore()
-const currentAuthId = firebase.auth().currentUser.uid
+const defaultAuth = firebase.auth()
 
 export default Vue.extend({
   components: {
@@ -34,6 +34,7 @@ export default Vue.extend({
   data() {
     return {
       subject: {
+        currentAuthId: "",
         title: "",
         optionList: "",
         isPublic: true,
@@ -49,13 +50,20 @@ export default Vue.extend({
       const newSubject = db.collection("subjects")
       const newOptions = db.collection("options")
 
+      defaultAuth.onAuthStateChanged((user) => {
+        if (user) {
+          this.subject.currentAuthId = user.uid
+        } else {
+          // No user is signed in.
+        }
+      })
       db.settings({
         timestampsInSnapshots: true,
       })
 
       newSubject
         .add({
-          authId: currentAuthId,
+          authId: this.subject.currentAuthId,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           title: this.subject.title,
           isCloseVoted: this.subject.isCloseVoted,
