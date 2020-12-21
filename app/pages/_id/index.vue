@@ -24,14 +24,16 @@
       </button>
     </div>
     <div v-else class="result">
-      投票結果<br /><br />
+      投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
+      <br /><br />
       <ul>
         <li v-for="option in options" :key="option.id" class="list-option">
-          {{ option.title }}
+          {{ option.rank }}位 … {{ option.title }}
           <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
         </li>
       </ul>
       <!-- TODO: 下記リンク先を画面遷移なしで出来ればそうする -->
+      <br />
       <a href="">投票し直す</a><br />
       <a href="/">トップに戻る</a>
     </div>
@@ -111,7 +113,6 @@ export default {
     },
 
     // 投票結果を選択肢配列に反映する
-    // TODO: isCloseVoted の値に応じた結果にする
     getResult() {
       db.collection("votes")
         .where("subjectId", "==", this.subjectId)
@@ -135,24 +136,22 @@ export default {
           this.options.sort((a, b) => {
             return a.score < b.score
           })
-          // visibleOrderが0より大きければ、結果表示に反映する
-          if (this.visibleOrder > 0) {
-            // 表示用の一時配列を準備
-            const newOptions = []
-            let preScore = null
-            this.options.forEach((option) => {
-              // まず得票数の多い順に、visibleOrderの数だけ選択肢を配列に入れる
-              // さらにvisibleOrder最後と同じ得票数の選択肢があれば、それも配列に入れる
-              if (
-                newOptions.length < this.visibleOrder ||
-                option.score === preScore
-              ) {
-                newOptions.push(option)
-                preScore = option.score
-              }
-            })
-            this.options = newOptions
-          }
+          // 順位を計算して格納する
+          let rank = 1
+          let preScore = null
+          this.options = this.options.filter((option) => {
+            if (option.score < preScore) {
+              rank++
+            }
+            option.rank = rank
+            preScore = option.score
+            if (this.visibleOrder > 0 && rank > this.visibleOrder) {
+              // visibleOrder指定があり(0より大きい)、かつrankがvisibleOrderを超えたら
+              // 表示しないので、ここで要素を返さない
+            } else {
+              return option
+            }
+          })
         })
         .catch((error) => {
           console.log("[ERROR] in afterVote: ", error)
