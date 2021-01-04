@@ -50,16 +50,11 @@ export default {
     const currentAuthId = firebase.auth().currentUser.uid
     const currentSubjectId = params.id
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
-    const docData = questionData.subjectData
     return {
-      authId: currentAuthId,
-      isCloseVoted: docData.isCloseVoted,
-      isMine: docData.createdMe,
-      isPublic: docData.isPublic,
+      ...questionData.subjectData,
+      authId: currentAuthId, // 同じキーの値を上書き
       options: questionData.options, // 選択肢の配列. 得票数も格納する
-      subjectId: currentSubjectId,
-      title: docData.title,
-      visibleOrder: docData.visibleOrder,
+      subjectId: params.id,
       votedDocId: questionData.votedDocId,
     }
   },
@@ -102,7 +97,7 @@ export default {
 
     // 投票後の遷移
     afterVote() {
-      if (this.isMine || this.isPublic) {
+      if (this.createMe || this.isPublic) {
         // 自分の質問 or すぐ結果を表示する設定なら, 投票結果を取得＆表示する
         this.showResult = true
         this.getResult()
