@@ -60,7 +60,6 @@ export default {
       authId: currentAuthId, // 同じキーの値を上書き
       options, // 選択肢の配列. 得票数も格納する
       subjectId: params.id,
-      votedDocId: questionData.votedDocId,
     }
   },
   data: () => ({
