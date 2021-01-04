@@ -50,10 +50,15 @@ export default {
     const currentAuthId = firebase.auth().currentUser.uid
     const currentSubjectId = params.id
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
+    const options = questionData.options
+    // 選択肢がないor一つしかない場合、トップページに戻る
+    if (options.length < 2) {
+      location.href = "/"
+    }
     return {
       ...questionData.subjectData,
       authId: currentAuthId, // 同じキーの値を上書き
-      options: questionData.options, // 選択肢の配列. 得票数も格納する
+      options, // 選択肢の配列. 得票数も格納する
       subjectId: params.id,
       votedDocId: questionData.votedDocId,
     }
