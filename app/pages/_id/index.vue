@@ -51,8 +51,8 @@ export default {
     const currentSubjectId = params.id
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
     const options = questionData.options
-    // 選択肢がないor一つしかない場合、トップページに戻る
-    if (options.length < 2) {
+    // 質問タイトルが未設定か、選択肢がないor一つしかない場合、トップページに戻る
+    if (questionData.title === "" || options.length < 2) {
       location.href = "/"
     }
     return {
