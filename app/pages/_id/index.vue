@@ -191,8 +191,14 @@ async function getQuestionData(authId, subjectId) {
     optionsAry.push({ ...doc.data(), id: doc.id, score: 0 })
   })
 
-  // TODO: order昇順にソート
-  console.log(optionsAry)
+  // 選択肢をソート (orderがあればその順、なければタイトル順)
+  optionsAry.sort((a, b) => {
+    if (a.order && b.order) {
+      return a.order > b.order
+    } else {
+      return a.title > b.title
+    }
+  })
 
   // 質問に回答済みか否かを取得
   const votedSnapshot = await db
