@@ -185,11 +185,14 @@ async function getQuestionData(authId, subjectId) {
     .catch((error) => {
       console.log("[ERROR] in getQuestionData (options): ", error)
     })
+  // 表示・操作用に選択肢の配列を作成
   const optionsAry = []
   querySnapshot.forEach((doc) => {
-    const data = doc.data()
-    optionsAry.push({ id: doc.id, title: data.title, score: 0 })
+    optionsAry.push({ ...doc.data(), id: doc.id, score: 0 })
   })
+
+  // TODO: order昇順にソート
+  console.log(optionsAry)
 
   // 質問に回答済みか否かを取得
   const votedSnapshot = await db
