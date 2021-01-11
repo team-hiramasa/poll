@@ -56,10 +56,10 @@ export default {
       location.href = "/"
     }
     return {
-      ...questionData.subjectData,
+      ...questionData,
       authId: currentAuthId, // 同じキーの値を上書き
       options, // 選択肢の配列. 得票数も格納する
-      subjectId: params.id,
+      subjectId: currentSubjectId,
     }
   },
   data: () => ({
@@ -160,8 +160,10 @@ export default {
 }
 
 // 質問の情報・選択肢をまとめて取得する
+// 返すオブジェクトを最初に作ってから要素を足している (その方が分かりやすいかと)
 async function getQuestionData(authId, subjectId) {
-  const doc = await db
+  let returnObject = {}
+  const questionDoc = await db
     .collection("subjects")
     .doc(subjectId)
     .get()
@@ -170,12 +172,11 @@ async function getQuestionData(authId, subjectId) {
     })
 
   // 存在しないIDの質問がリクエストされた場合、トップに戻る
-  if (!doc.exists) {
+  if (!questionDoc.exists) {
     location.href = "/"
+  } else {
+    returnObject = questionDoc.data()
   }
-
-  // 質問の情報を取得
-  const docData = doc.data()
 
   // 質問の選択肢を取得
   const querySnapshot = await db
@@ -185,14 +186,15 @@ async function getQuestionData(authId, subjectId) {
     .catch((error) => {
       console.log("[ERROR] in getQuestionData (options): ", error)
     })
+
   // 表示・操作用に選択肢の配列を作成
-  const optionsAry = []
+  const options = []
   querySnapshot.forEach((doc) => {
-    optionsAry.push({ ...doc.data(), id: doc.id, score: 0 })
+    options.push({ ...doc.data(), id: doc.id, score: 0 })
   })
 
   // 選択肢をソート (orderがあればその順、なければタイトル順)
-  optionsAry.sort((a, b) => {
+  options.sort((a, b) => {
     if (a.order && b.order) {
       return a.order > b.order
     } else {
@@ -200,7 +202,14 @@ async function getQuestionData(authId, subjectId) {
     }
   })
 
+  // 選択肢の配列を、返すオブジェクトに追加
+  returnObject = {
+    ...returnObject,
+    options,
+  }
+
   // 質問に回答済みか否かを取得
+  // 回答済みなら、votesのドキュメントIDをvotedDocIdとして返すオブジェクトに追加
   const votedSnapshot = await db
     .collection("votes")
     .where("authId", "==", authId)
@@ -209,23 +218,18 @@ async function getQuestionData(authId, subjectId) {
     .catch((error) => {
       console.log("[ERROR] in getQuestionData (votedSnapshot): ", error)
     })
-  let tmpVotedDocId = null
+  let votedDocId = null
   if (votedSnapshot.size > 0) {
     votedSnapshot.forEach((doc) => {
-      tmpVotedDocId = doc.id
+      votedDocId = doc.id
     })
   }
-
-  return {
-    createdMe: authId === docData.authId,
-    isCloseVoted: docData.isCloseVoted,
-    isPublic: docData.isPublic,
-    options: optionsAry,
-    subjectData: docData,
-    title: docData.title,
-    visibleOrder: docData.visibleOrder,
-    votedDocId: tmpVotedDocId,
+  returnObject = {
+    ...returnObject,
+    votedDocId,
   }
+
+  return returnObject
 }
 </script>
 
