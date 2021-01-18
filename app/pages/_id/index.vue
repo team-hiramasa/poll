@@ -169,7 +169,6 @@ export default {
             } else {
               // 表示する選択肢を返す. この時コメントのオブジェクトを配列で格納する
               option.comments = Object.keys(comments[option.id])
-              console.log(option)
               return option
             }
           })
