@@ -30,6 +30,15 @@
         <li v-for="option in options" :key="option.id" class="list-option">
           {{ option.rank }}位 … {{ option.title }}
           <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
+          <div v-if="option.comments && option.comments.length > 0">
+            <ul>
+              <span>コメント：</span>
+              <li v-for="comment in option.comments" :key="comment.id">
+                「{{ comment }}」
+              </li>
+            </ul>
+          </div>
+          <br />
         </li>
       </ul>
       <!-- TODO: 下記リンク先を画面遷移なしで出来ればそうする -->
@@ -111,16 +120,26 @@ export default {
       }
     },
 
-    // 投票結果を選択肢配列に反映する
+    // 投票結果を選択肢配列に反映する. この中でコメントも格納する
     getResult() {
       db.collection("votes")
         .where("subjectId", "==", this.subjectId)
         .get()
         .then((docs) => {
-          // 選択肢IDごとに得票数を格納する一時オブジェクトを作成
+          // 選択肢IDごとにコメント、得票数用の一時オブジェクトをそれぞれ作成
+          // TODO: 長いので別関数にする
+          const comments = {}
           const scores = {}
           docs.forEach((doc) => {
-            const optionId = doc.data().optionId
+            const docData = doc.data()
+            const comment = docData.comment
+            const optionId = docData.optionId
+            if (comment) {
+              if (!comments[optionId]) {
+                comments[optionId] = {}
+              }
+              comments[optionId][comment] = ""
+            }
             if (!scores[optionId]) {
               scores[optionId] = 1
             } else {
@@ -148,6 +167,9 @@ export default {
               // visibleOrder指定があり(0より大きい)、かつrankがvisibleOrderを超えたら
               // 表示しないので、ここで要素を返さない
             } else {
+              // 表示する選択肢を返す. この時コメントのオブジェクトを配列で格納する
+              option.comments = Object.keys(comments[option.id])
+              console.log(option)
               return option
             }
           })
