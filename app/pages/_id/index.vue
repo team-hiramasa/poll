@@ -34,7 +34,7 @@
             <ul>
               <span>コメント：</span>
               <li v-for="comment in option.comments" :key="comment.id">
-                「{{ comment }}」
+                {{ comment }}
               </li>
             </ul>
           </div>
@@ -80,7 +80,6 @@ export default {
     // 投票する
     vote() {
       // 選択されている選択肢のIDを取得
-      // TODO: 空の場合メッセージ出して終わる
       const checkedId = this.checkedOption
       if (checkedId) {
         if (this.votedDocId) {
@@ -105,6 +104,9 @@ export default {
         }
         // 次へ遷移
         this.afterVote()
+      } else {
+        // TODO: 選択肢を未選択の場合にメッセージ出す
+        // alert("選択肢が未選択")
       }
     },
 
