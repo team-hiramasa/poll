@@ -1,21 +1,21 @@
 <template>
   <v-app>
     <v-container class="px-0" fluid>
-      <div>
-        <edit-form
-          :title.sync="subject.title"
-          :option-list.sync="subject.optionList"
-          :is-public.sync="subject.isPublic"
-          :is-close-vote.sync="subject.isCloseVoted"
-          :visible-order.sync="subject.visibleOrder"
-          :items.sync="subject.items"
-          :option-list-example.sync="subject.optionListExample"
-        />
-      </div>
-
-      <v-btn type="submit" @click="createSubject">
-        新規作成
-      </v-btn>
+      <edit-form
+        :title.sync="subject.title"
+        :option-list.sync="subject.optionList"
+        :is-public.sync="subject.isPublic"
+        :is-close-vote.sync="subject.isCloseVoted"
+        :visible-order.sync="subject.visibleOrder"
+        :orderitems.sync="subject.orderitems"
+        :option-list-example.sync="subject.optionListExample"
+        :is-create-mode="true"
+        @onpushed="createSubject"
+      >
+        <v-row>
+          <v-textarea value="optionListExample" label="入力例" disabled />
+        </v-row>
+      </edit-form>
     </v-container>
   </v-app>
 </template>
@@ -23,7 +23,7 @@
 <script lang="ts">
 import Vue from "vue"
 import firebase from "@/plugins/firebase"
-import EditForm from "~/components/EditForm.vue"
+import EditForm from "@/components/EditForm.vue"
 const db = firebase.firestore()
 const defaultAuth = firebase.auth()
 
@@ -40,7 +40,7 @@ export default Vue.extend({
         isPublic: true,
         isCloseVoted: true,
         visibleOrder: 1,
-        items: [1, 2, 3],
+        orderitems: [1, 2, 3],
         optionListExample: "サッカー\n野球\nテニス",
       },
     }
@@ -54,7 +54,7 @@ export default Vue.extend({
         if (user) {
           this.subject.currentAuthId = user.uid
         } else {
-          // No user is signed in.
+          location.href = "/"
         }
       })
       db.settings({
@@ -73,22 +73,16 @@ export default Vue.extend({
         .then((ref) => {
           const newSubjectId = ref.id
           const objectsListArray = this.subject.optionList.split("\n")
-          console.log(this.subject.title)
-          console.log(this.subject.optionList)
-          console.log(this.subject.isPublic)
-          console.log(this.subject.isCloseVoted)
-          console.log(this.subject.visibleOrder)
-          console.log("Add ID: ", newSubjectId)
           for (let counter = 0; counter < objectsListArray.length; counter++) {
             if (objectsListArray[counter] !== "") {
               newOptions
                 .add({
                   subjectId: newSubjectId,
                   title: objectsListArray[counter],
+                  order: counter,
                 })
                 .catch((error) => {
                   console.log("[ERROR] in getting documents: ", error)
-                  location.href = "/"
                 })
             }
           }
@@ -96,7 +90,6 @@ export default Vue.extend({
         })
         .catch((error) => {
           console.log("[ERROR] in getting documents: ", error)
-          location.href = "/"
         })
     },
   },

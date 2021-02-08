@@ -1,55 +1,63 @@
 <template>
-  <div class="mainform">
-    <div>
-      質問の編集
-    </div>
-
-    <v-text-field
-      :value="title"
-      counter="25"
-      hint="入力例：好きなスポーツは？"
-      label="質問"
-      @input="$emit('update:title', $event)"
-    />
-
-    <v-textarea
-      :value="optionList"
-      label="回答"
-      hint="改行で選択肢になります。"
-      @input="$emit('update:optionList', $event)"
-    />
-
-    <v-textarea :value="optionListExample" label="入力例" disabled />
-    <div>
-      投票結果をすぐに公開するかどうか
+  <v-form class="mainform">
+    <v-row> 質問の編集 </v-row>
+    <v-row>
+      <v-text-field
+        v-model="titleData"
+        counter="25"
+        hint="入力例：好きなスポーツは？"
+        label="質問"
+      />
+    </v-row>
+    <v-row>
+      <v-textarea
+        v-model="optionListData"
+        label="回答"
+        hint="改行で選択肢になります。"
+      />
+    </v-row>
+    <v-row>
+      <slot />
+    </v-row>
+    <v-row>
+      投票結果の票数を表示するかどうか<v-spacer />
       <v-switch
         v-model="isPublicData"
         :label="`${isPublicMessage(isPublicData)}`"
       />
-    </div>
-
-    <div>
-      投票結果の票数を表示するかどうか
+    </v-row>
+    <v-row>
+      投票結果の票数を表示するかどうか<v-spacer />
       <v-switch
         v-model="isCloseVotedData"
         :label="`${isCloseVotedMessage(isCloseVotedData)}`"
       />
-    </div>
-    <v-select
-      :value="visibleOrder"
-      :items="items"
-      :rules="[(v) => !!v || 'Item is required']"
-      label="投票結果を何位まで表示するか"
-      required
-      @input="$emit('update:visibleOrder', $event)"
-    />
-  </div>
+    </v-row>
+
+    <v-row>
+      <v-select
+        :value="visibleOrderData"
+        :items="orderitems"
+        :rules="[(v) => !!v || 'Item is required']"
+        label="投票結果を何位まで表示するか"
+        required
+      />
+    </v-row>
+
+    <v-row>
+      <v-spacer />
+      <v-btn v-if="isCreateMode" @click="onpushed">
+        新規作成
+      </v-btn>
+      <v-btn v-else @click="onpushed">
+        更新
+      </v-btn>
+    </v-row>
+  </v-form>
 </template>
 
 <script lang="ts">
-// 取得したoptionをテキストに変換
 import Vue from "vue"
-
 export default Vue.extend({
   props: {
     title: {
@@ -63,6 +71,12 @@ export default Vue.extend({
     isPublic: {
       type: Boolean,
       default: true,
+      required: false,
+    },
+    page: {
+      type: Number,
+      default: 1,
+      required: false,
     },
     isCloseVoted: {
       type: Boolean,
@@ -72,7 +86,7 @@ export default Vue.extend({
       type: Number,
       default: 1,
     },
-    items: {
+    orderitems: {
       type: Array,
       default: () => {},
     },
@@ -80,14 +94,34 @@ export default Vue.extend({
       type: String,
       default: "",
     },
+    isCreateMode: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  data() {
+    return {
+      headers: [
+        { text: "ID", value: "id" },
+        { text: "選択肢名", value: "option" },
+      ],
+    }
   },
   computed: {
-    isPublicData: {
+    titleData: {
       get() {
-        return this.$props.isPublic
+        return this.$props.title
       },
       set(value) {
-        this.$emit("update:isPublic", value)
+        this.$emit("update:title", value)
+      },
+    },
+    optionListData: {
+      get() {
+        return this.$props.optionListData
+      },
+      set(value) {
+        this.$emit("update:optionListData", value)
       },
     },
     isCloseVotedData: {
@@ -98,22 +132,42 @@ export default Vue.extend({
         this.$emit("update:isCloseVoted", value)
       },
     },
+    isPublicData: {
+      get() {
+        return this.$props.isPublic
+      },
+      set(value) {
+        this.$emit("update:isPublic", value)
+      },
+    },
+    visibleOrderData: {
+      get() {
+        return this.$props.isCloseVoted
+      },
+      set(value) {
+        this.$emit("update:isCloseVoted", value)
+      },
+    },
   },
   methods: {
     isPublicMessage(value: boolean) {
-      if (value) {
-        return "公開する"
-      } else {
-        return "公開しない"
-      }
+      return value ? "公開する" : "公開しない"
     },
     isCloseVotedMessage(value: boolean) {
-      if (value) {
-        return "表示する"
-      } else {
-        return "表示しない"
-      }
+      return value ? "表示する" : "表示しない"
+    },
+    onpushed() {
+      this.$emit("onpushed")
+    },
+    onEnd() {
+      this.$emit("onend")
     },
   },
 })
 </script>
+<style>
+.mainform {
+  width: 400px;
+  margin: 0 auto;
+}
+</style>
