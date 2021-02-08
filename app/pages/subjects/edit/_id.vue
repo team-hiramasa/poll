@@ -1,113 +1,28 @@
 <template>
   <v-app>
     <v-container class="px-0" fluid>
-      <div>
-        <edit-form
-          :title.sync="subject.title"
-          :option-list.sync="subject.optionList"
-          :is-public.sync="subject.isPublic"
-          :is-close-vote.sync="subject.isCloseVoted"
-          :visible-order.sync="subject.visibleOrder"
-          :orderitems.sync="subject.orderitems"
-          :option-list-example.sync="subject.optionListExample"
-          :is-create-mode="false"
-          :page="1"
-          @renumberOrders="renumberOrders"
-        >
-          <div class="py-3">
-            <v-row>
-              <v-col>
-                <table class="validtable text-center">
-                  <thead>
-                    <tr>
-                      <th height="64" width="48">
-                        ID
-                      </th>
-                      <th>
-                        保存される選択肢
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    is="draggable"
-                    v-model="validoptions"
-                    tag="tbody"
-                    group="options-list"
-                    dark
-                    @end="renumberOrders"
-                  >
-                    <tr v-for="(item, i) in validoptions" :key="i" height="32">
-                      <td height="32">
-                        {{ item.id }}
-                      </td>
-                      <td class="px-2">
-                        <v-text-field
-                          v-model="validoptions[i].option"
-                          append-outer-icon="mdi-close"
-                          @click:append-outer="deleteOption(i)"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col class="text-right">
-                <v-btn class="blue darken-2" @click="addOption">
-                  新規選択肢を追加
-                </v-btn>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <table class="invalidtable text-center">
-                  <thead>
-                    <tr>
-                      <th height="64" width="48">
-                        ID
-                      </th>
-                      <th>
-                        削除される選択肢
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    is="draggable"
-                    v-model="invalidoptions"
-                    tag="tbody"
-                    group="options-list"
-                    @end="renumberOrders"
-                  >
-                    <tr v-for="(item, i) in invalidoptions" :key="i">
-                      <td>{{ item.id }}</td>
-                      <td class="px-2">
-                        {{ invalidoptions[i].option }}
-                        <v-icon style="float: right;" @click="redoOption(i)">
-                          mdi-redo
-                        </v-icon>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </v-col>
-            </v-row>
-          </div>
-        </edit-form>
-        <v-row>
-          <v-spacer />
-          <v-btn type="submit" @onpushed="editsubject">
-            更新
-          </v-btn>
-        </v-row>
-      </div>
+      <edit-form
+        :title.sync="subject.title"
+        :option-list.sync="subject.optionList"
+        :is-public.sync="subject.isPublic"
+        :is-close-vote.sync="subject.isCloseVoted"
+        :visible-order.sync="subject.visibleOrder"
+        :orderitems.sync="subject.orderitems"
+        :option-list-example.sync="subject.optionListExample"
+        :is-create-mode="false"
+        @onpushed="editSubject"
+      >
+        <edit-options
+          :validoptions.sync="validoptions"
+          :invalidoptions.sync="invalidoptions"
+        />
+      </edit-form>
     </v-container>
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
-import draggable from "vuedraggable"
 import firebase from "@/plugins/firebase"
 import EditForm from "@/components/EditForm.vue"
 
@@ -117,7 +32,6 @@ const defaultAuth = firebase.auth()
 export default Vue.extend({
   components: {
     EditForm,
-    draggable,
   },
   data() {
     return {
@@ -163,7 +77,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    editsubject() {
+    editSubject() {
       const subject = db.collection("subjects")
       const options = db.collection("options")
 

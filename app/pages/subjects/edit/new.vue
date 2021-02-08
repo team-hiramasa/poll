@@ -12,9 +12,7 @@
         :is-create-mode="true"
         @onpushed="createSubject"
       >
-        <v-row>
-          <v-textarea value="optionListExample" label="入力例" disabled />
-        </v-row>
+        <create-options :option-list.sync="optionList" />
       </edit-form>
     </v-container>
   </v-app>
@@ -41,7 +39,6 @@ export default Vue.extend({
         isCloseVoted: true,
         visibleOrder: 1,
         orderitems: [1, 2, 3],
-        optionListExample: "サッカー\n野球\nテニス",
       },
     }
   },

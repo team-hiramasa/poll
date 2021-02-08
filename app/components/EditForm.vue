@@ -9,16 +9,7 @@
         label="質問"
       />
     </v-row>
-    <v-row>
-      <v-textarea
-        v-model="optionListData"
-        label="回答"
-        hint="改行で選択肢になります。"
-      />
-    </v-row>
-    <v-row>
-      <slot />
-    </v-row>
+    <slot />
     <v-row>
       投票結果の票数を表示するかどうか<v-spacer />
       <v-switch
