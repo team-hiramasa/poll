@@ -2,11 +2,21 @@
   <v-form class="mainform">
     <v-row> 質問の編集 </v-row>
     <v-row>
-      <v-text-field
+      <v-textarea
         v-model="titleData"
-        counter="25"
+        append-outer-icon="mdi-close"
+        counter="50"
         hint="入力例：好きなスポーツは？"
         label="質問"
+        auto-grow="true"
+        rows="1"
+        :rules="[
+          (v) => v.length <= 50 || '50字以内でお願いします',
+          (v) => v.length + isSubmited != 0 || '入力してください',
+        ]"
+        @blur="titleData = titleData.replace(/\n/g, '')"
+        @keydown.enter.prevent
+        @click:append-outer="titleData = ''"
       />
     </v-row>
     <slot />
@@ -29,7 +39,6 @@
       <v-select
         :value="visibleOrderData"
         :items="orderitems"
-        :rules="[(v) => !!v || 'Item is required']"
         label="投票結果を何位まで表示するか"
         required
       />
@@ -88,6 +97,10 @@ export default Vue.extend({
     isCreateMode: {
       type: Boolean,
       default: true,
+    },
+    isSubmited: {
+      type: Number,
+      default: 1,
     },
   },
   data() {
@@ -158,7 +171,7 @@ export default Vue.extend({
 </script>
 <style>
 .mainform {
-  width: 400px;
+  width: 500px;
   margin: 0 auto;
 }
 </style>

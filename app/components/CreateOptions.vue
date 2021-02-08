@@ -5,6 +5,7 @@
         v-model="optionListData"
         label="回答"
         hint="改行で選択肢になります。"
+        :rules="[(v) => v.length > 0 || '入力してください']"
       />
     </v-row>
     <v-row>

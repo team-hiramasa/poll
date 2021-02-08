@@ -21,14 +21,23 @@
             dark
             @end="renumberOrders"
           >
-            <tr v-for="(item, i) in validoptions" :key="i" height="32">
+            <tr v-for="(item, i) in validoptionsData" :key="i" height="32">
               <td height="32">
                 {{ item.id }}
               </td>
               <td class="px-2">
-                <v-text-field
-                  v-model="validoptions[i].option"
+                <v-textarea
+                  v-model="item.option"
                   append-outer-icon="mdi-close"
+                  counter="50"
+                  auto-grow="true"
+                  rows="1"
+                  :rules="[
+                    (v) => v.length <= 50 || '50字以内でお願いします',
+                    (v) => v.length + isSubmited > 0 || '入力してください',
+                  ]"
+                  @blur="item.option = item.option.replace(/\n/g, '')"
+                  @keydown.enter.prevent
                   @click:append-outer="deleteOption(i)"
                 />
               </td>
@@ -67,7 +76,7 @@
             <tr v-for="(item, i) in invalidoptions" :key="i">
               <td>{{ item.id }}</td>
               <td class="px-2">
-                {{ invalidoptions[i].option }}
+                {{ item.option }}
                 <v-icon style="float: right;" @click="redoOption(i)">
                   mdi-redo
                 </v-icon>
@@ -97,13 +106,17 @@ export default Vue.extend({
       type: Array,
       default: () => {},
     },
+    isSubmited: {
+      type: Number,
+      default: 1,
+    },
   },
   computed: {
     validoptionsData: {
       get() {
         return this.$props.validoptions
       },
-      set(value) {
+      set(value: string) {
         this.$emit("update:validoptions", value)
       },
     },
@@ -119,11 +132,11 @@ export default Vue.extend({
   methods: {
     renumberOrders() {
       const me = this
-      for (let i = 0; me.validoptionsData.length > i; i++) {
-        me.validoptionsData[i].id = i + 1
+      for (const i in me.validoptionsData) {
+        me.validoptionsData[Number(i)].id = Number(i) + 1
       }
-      for (let i = 0; me.invalidoptionsData.length > i; i++) {
-        me.invalidoptionsData[i].id = i + 1
+      for (const i in me.invalidoptionsData) {
+        me.invalidoptionsData[Number(i)].id = Number(i) + 1
       }
     },
 
