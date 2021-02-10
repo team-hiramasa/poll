@@ -43,15 +43,15 @@ jobs:
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
-    - name: Set COMMIT_MESSAGE
-      run: echo ::set-env name=COMMIT_MESSAGE::$(echo "${{ github.event.head_commit.message }}" | tr '\n' ' ')
-    - name: Slack Notification on SUCCESS
+
+    # ビルド成功時にSlack通知を飛ばす
+    - name: post message to Slack by success
       if: success()
       uses: tokorom/action-slack-incoming-webhook@master
       env:
         INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       with:
-        text: ビルド成功です！やったね！
+        text: "*ビルド成功です!!* :clap:"
         attachments: |
           [
             {
@@ -60,11 +60,7 @@ jobs:
               "author_icon": "${{ github.event.sender.avatar_url }}",
               "fields": [
                 {
-                  "title": "Commit Message",
-                  "value": "${{ env.COMMIT_MESSAGE }}"
-                },
-                {
-                  "title": "GitHub Actions URL",
+                  "title": "実行されたActions",
                   "value": "${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
                 },
                 {
