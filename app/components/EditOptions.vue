@@ -6,7 +6,7 @@
           <thead>
             <tr>
               <th height="64" width="48">
-                ID
+                No.
               </th>
               <th>
                 保存される選択肢
@@ -15,28 +15,27 @@
           </thead>
           <tbody
             is="draggable"
-            v-model="validoptions"
+            v-model="validoptionsData"
             tag="tbody"
             group="options-list"
             dark
-            @end="renumberOrders"
           >
             <tr v-for="(item, i) in validoptionsData" :key="i" height="32">
               <td height="32">
-                {{ item.id }}
+                {{ item.order + 1 }}
               </td>
               <td class="px-2">
                 <v-textarea
-                  v-model="item.option"
+                  v-model="item.title"
                   append-outer-icon="mdi-close"
                   counter="50"
-                  auto-grow="true"
+                  :auto-grow="true"
                   rows="1"
                   :rules="[
                     (v) => v.length <= 50 || '50字以内でお願いします',
                     (v) => v.length > 0 || '入力してください',
                   ]"
-                  @blur="item.option = item.option.replace(/\n/g, '')"
+                  @blur="item.title = item.title.replace(/\n/g, '')"
                   @keydown.enter.prevent
                   @click:append-outer="deleteOption(i)"
                 />
@@ -68,15 +67,14 @@
           </thead>
           <tbody
             is="draggable"
-            v-model="invalidoptions"
+            v-model="invalidoptionsData"
             tag="tbody"
             group="options-list"
-            @end="renumberOrders"
           >
             <tr v-for="(item, i) in invalidoptions" :key="i">
-              <td>{{ item.id }}</td>
+              <td>{{ item.order + 1 }}</td>
               <td class="px-2">
-                {{ item.option }}
+                {{ item.title }}
                 <v-icon style="float: right;" @click="undoOption(i)">
                   mdi-undo
                 </v-icon>
@@ -93,6 +91,12 @@
 import Vue from "vue"
 import draggable from "vuedraggable"
 
+export type Option = {
+  id: string
+  subjectId: string
+  order: number
+  title: string
+}
 export default Vue.extend({
   components: {
     draggable,
@@ -109,54 +113,59 @@ export default Vue.extend({
   },
   computed: {
     validoptionsData: {
-      get() {
+      get(): Array<Option> {
         return this.$props.validoptions
       },
-      set(value: string) {
+      set(value: Array<Option>): void {
         this.$emit("update:validoptions", value)
       },
     },
     invalidoptionsData: {
-      get() {
+      get(): Array<Option> {
         return this.$props.invalidoptions
       },
-      set(value) {
+      set(value: Array<Option>): void {
         this.$emit("update:invalidoptions", value)
       },
     },
   },
-  methods: {
-    renumberOrders() {
+  watch: {
+    validoptionsData() {
       const me = this
       for (const i in me.validoptionsData) {
-        me.validoptionsData[Number(i)].id = Number(i) + 1
-      }
-      for (const i in me.invalidoptionsData) {
-        me.invalidoptionsData[Number(i)].id = Number(i) + 1
+        me.validoptionsData[Number(i)].order = Number(i)
       }
     },
-
-    addOption() {
+    invalidoptionsData() {
       const me = this
-      me.validoptionsData.push({
-        id: me.validoptionsData.length - 1,
-        option: "",
+      for (const i in me.invalidoptionsData) {
+        me.invalidoptionsData[Number(i)].order = Number(i)
+      }
+    },
+  },
+  methods: {
+    addOption() {
+      this.validoptionsData.push({
+        id: "",
+        subjectId: "",
+        order: this.validoptionsData.length,
+        title: "",
       })
-      me.renumberOrders()
     },
 
     deleteOption(index: number) {
-      const me = this
-      me.invalidoptionsData.push(me.validoptionsData[index])
-      me.validoptionsData.splice(index, 1)
-      me.renumberOrders()
+      if (
+        this.validoptionsData[index].subjectId.length > 0 ||
+        this.validoptionsData[index].title.length > 0
+      ) {
+        this.invalidoptionsData.push(this.validoptionsData[index])
+      }
+      this.validoptionsData.splice(index, 1)
     },
 
     undoOption(index: number) {
-      const me = this
-      me.validoptionsData.push(me.invalidoptionsData[index])
-      me.invalidoptionsData.splice(index, 1)
-      me.renumberOrders()
+      this.validoptionsData.push(this.invalidoptionsData[index])
+      this.invalidoptionsData.splice(index, 1)
     },
   },
 })

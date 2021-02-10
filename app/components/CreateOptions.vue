@@ -30,7 +30,7 @@ export default Vue.extend({
   },
   computed: {
     optionListData: {
-      get(): String {
+      get(): string {
         return this.$props.optionList
       },
       set(value: string): any {

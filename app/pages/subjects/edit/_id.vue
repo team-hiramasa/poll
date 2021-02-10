@@ -6,11 +6,9 @@
           :title.sync="subject.title"
           :option-list.sync="subject.optionList"
           :is-public.sync="subject.isPublic"
-          :is-close-vote.sync="subject.isCloseVoted"
+          :is-close-voted.sync="subject.isCloseVoted"
           :visible-order.sync="subject.visibleOrder"
           :orderitems.sync="subject.orderitems"
-          :option-list-example.sync="subject.optionListExample"
-          :is-create-mode="false"
           @onpushed="editSubject"
         >
           <edit-options
@@ -29,7 +27,12 @@ import firebase from "@/plugins/firebase"
 import EditForm from "@/components/EditForm.vue"
 
 const db = firebase.firestore()
-const defaultAuth = firebase.auth()
+export type Option = {
+  id: string
+  subjectId: string
+  order: number
+  title: string
+}
 
 export default Vue.extend({
   components: {
@@ -46,111 +49,108 @@ export default Vue.extend({
         isCloseVoted: true,
         visibleOrder: 1,
         orderitems: [1, 2, 3],
-        optionListExample: "サッカー\n野球\nテニス",
       },
-
-      validoptions: [
-        {
-          id: 1,
-          option: "アイデア1",
-        },
-        {
-          id: 2,
-          option: "アイデア2",
-        },
-        {
-          id: 3,
-          option: "アイデア3",
-        },
-      ],
-      invalidoptions: [
-        {
-          id: 1,
-          option: "没アイデア1",
-        },
-        {
-          id: 2,
-          option: "没アイデア2",
-        },
-      ],
+      validoptions: [] as Array<Option>,
+      invalidoptions: [] as Array<Option>,
     }
+  },
+  created() {
+    const currentId = this.$route.params.id
+    const docRef = db.collection("subjects").doc(currentId)
+    const me = this
+    docRef
+      .get()
+      .then(function (doc) {
+        if (doc.exists) {
+          const currentSubject: any = doc.data()
+          me.subject.title = currentSubject.title
+          me.subject.isPublic = currentSubject.isPublic
+          me.subject.isCloseVoted = currentSubject.isCloseVoted
+          me.subject.visibleOrder = currentSubject.visibleOrder
+          console.log("Document data:", doc.data())
+          db.collection("options")
+            .where("subjectId", "==", currentId)
+            .get()
+            .then(function (querySnapshot) {
+              querySnapshot.forEach(function (doc) {
+                // doc.data() is never undefined for query doc snapshots
+                me.validoptions.push({
+                  id: String(doc.id),
+                  subjectId: String(doc.data().subjectId),
+                  title: String(doc.data().title),
+                  order: Number(doc.data().order),
+                })
+                me.validoptions.sort(function (a, b) {
+                  return Number(a.order) - Number(b.order)
+                })
+                console.log(doc.id, " => ", doc.data())
+              })
+            })
+            .catch(function (error) {
+              console.log("Error getting documents: ", error)
+            })
+        } else {
+          console.log("No such document!")
+        }
+      })
+      .catch(function (error) {
+        console.log("Error getting document:", error)
+      })
   },
   methods: {
     editSubject() {
-      const subject = db.collection("subjects")
-      const options = db.collection("options")
+      const currentMainSubjectId = this.$route.params.id
+      const me = this
+      const batch = db.batch()
 
-      defaultAuth.onAuthStateChanged((user) => {
-        if (user) {
-          this.subject.currentAuthId = user.uid
+      const subjectRef = db.collection("subjects").doc(currentMainSubjectId)
+
+      // Subject 更新
+      batch.set(subjectRef, {
+        title: me.subject.title,
+        isPublic: me.subject.isPublic,
+        isCloseVoted: me.subject.isCloseVoted,
+        visibleOrder: me.subject.visibleOrder,
+      })
+
+      // Options 更新
+      for (const i in me.validoptions) {
+        const currentId = me.validoptions[Number(i)].id
+        const currentOrder = me.validoptions[Number(i)].order
+        const currentTitle = me.validoptions[Number(i)].title
+        const currentSubjectId = me.validoptions[Number(i)].subjectId
+        if (currentSubjectId.length > 0) {
+          const validOptionRef = db.collection("options").doc(currentId)
+          batch.update(validOptionRef, {
+            subjectId: currentSubjectId,
+            title: currentTitle,
+            order: currentOrder,
+          })
         } else {
-          location.href = "/"
+          // Options 新規作成
+          db.collection("options")
+            .add({
+              subjectId: currentMainSubjectId,
+              title: currentTitle,
+              order: currentOrder,
+            })
+            .catch((error) => {
+              console.log("[ERROR] in getting documents: ", error)
+            })
         }
-      })
-      db.settings({
-        timestampsInSnapshots: true,
-      })
-
-      subject
-        .add({
-          authId: this.subject.currentAuthId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          title: this.subject.title,
-          isCloseVoted: this.subject.isCloseVoted,
-          isPublic: this.subject.isPublic,
-          visibleOrder: this.subject.visibleOrder,
-        })
-        .then((ref) => {
-          const subjectId = ref.id
-          const objectsListArray = this.subject.optionList.split("\n")
-          for (let counter = 0; counter < objectsListArray.length; counter++) {
-            if (objectsListArray[counter] !== "") {
-              options
-                .add({
-                  subjectId,
-                  title: objectsListArray[counter],
-                  order: counter,
-                })
-                .catch((error) => {
-                  console.log("[ERROR] in getting documents: ", error)
-                })
-            }
-          }
-          location.href = "/subject/" + subjectId
-        })
-        .catch((error) => {
-          console.log("[ERROR] in getting documents: ", error)
-        })
-    },
-
-    renumberOrders() {
-      const me = this
-      for (let i = 0; me.validoptions.length > i; i++) {
-        me.validoptions[i].id = i + 1
       }
-      for (let i = 0; me.invalidoptions.length > i; i++) {
-        me.invalidoptions[i].id = i + 1
+
+      // Options 削除
+      for (const i in me.invalidoptions) {
+        const currentOptionId = me.invalidoptions[Number(i)].id
+        if (currentOptionId.length > 0) {
+          const invalidOptionRef = db.collection("options").doc(currentOptionId)
+          batch.delete(invalidOptionRef)
+        }
       }
-    },
 
-    addOption() {
-      const me = this
-      me.validoptions.push({ id: me.validoptions.length - 1, option: "" })
-      me.renumberOrders()
-    },
-
-    deleteOption(index: number) {
-      const me = this
-      me.invalidoptions.push(me.validoptions[index])
-      me.validoptions.splice(index, 1)
-      me.renumberOrders()
-    },
-
-    redoOption(index: number) {
-      const me = this
-      me.validoptions.push(me.invalidoptions[index])
-      me.invalidoptions.splice(index, 1)
-      me.renumberOrders()
+      batch.commit()
+      document.location.reload()
     },
   },
 })

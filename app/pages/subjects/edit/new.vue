@@ -13,10 +13,7 @@
           :is-create-mode="true"
           @onpushed="createSubject"
         >
-          <create-options
-            :option-list.sync="optionList"
-            :is-submited.sync="isSubmited"
-          />
+          <create-options :option-list.sync="subject.optionList" />
         </edit-form>
       </v-form>
     </v-container>
@@ -95,7 +92,7 @@ export default Vue.extend({
                   })
               }
             }
-            location.href = "/subject/" + newSubjectId
+            location.href = "/subjects/edit/" + newSubjectId
           })
           .catch((error) => {
             console.log("[ERROR] in getting documents: ", error)
