@@ -98,7 +98,7 @@ export default Vue.extend({
       })
   },
   methods: {
-    editSubject() {
+    async editSubject() {
       const currentMainSubjectId = this.$route.params.id
       const me = this
       const batch = db.batch()
@@ -149,7 +149,7 @@ export default Vue.extend({
         }
       }
 
-      batch.commit()
+      await batch.commit()
       document.location.reload()
     },
   },
