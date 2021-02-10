@@ -1,19 +1,24 @@
 <template>
   <v-app>
     <v-container class="px-0" fluid>
-      <edit-form
-        :title.sync="subject.title"
-        :option-list.sync="subject.optionList"
-        :is-public.sync="subject.isPublic"
-        :is-close-vote.sync="subject.isCloseVoted"
-        :visible-order.sync="subject.visibleOrder"
-        :orderitems.sync="subject.orderitems"
-        :option-list-example.sync="subject.optionListExample"
-        :is-create-mode="true"
-        @onpushed="createSubject"
-      >
-        <create-options :option-list.sync="optionList" />
-      </edit-form>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <edit-form
+          :title.sync="subject.title"
+          :option-list.sync="subject.optionList"
+          :is-public.sync="subject.isPublic"
+          :is-close-voted.sync="subject.isCloseVoted"
+          :visible-order.sync="subject.visibleOrder"
+          :orderitems.sync="subject.orderitems"
+          :option-list-example.sync="subject.optionListExample"
+          :is-create-mode="true"
+          @onpushed="createSubject"
+        >
+          <create-options
+            :option-list.sync="optionList"
+            :is-submited.sync="isSubmited"
+          />
+        </edit-form>
+      </v-form>
     </v-container>
   </v-app>
 </template>
@@ -31,6 +36,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      valid: true,
       subject: {
         currentAuthId: "",
         title: "",
@@ -44,50 +50,57 @@ export default Vue.extend({
   },
   methods: {
     createSubject() {
-      const newSubject = db.collection("subjects")
-      const newOptions = db.collection("options")
+      const form: any = this.$refs.form
+      if (form.validate()) {
+        const newSubject = db.collection("subjects")
+        const newOptions = db.collection("options")
 
-      defaultAuth.onAuthStateChanged((user) => {
-        if (user) {
-          this.subject.currentAuthId = user.uid
-        } else {
-          location.href = "/"
-        }
-      })
-      db.settings({
-        timestampsInSnapshots: true,
-      })
-
-      newSubject
-        .add({
-          authId: this.subject.currentAuthId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          title: this.subject.title,
-          isCloseVoted: this.subject.isCloseVoted,
-          isPublic: this.subject.isPublic,
-          visibleOrder: this.subject.visibleOrder,
-        })
-        .then((ref) => {
-          const newSubjectId = ref.id
-          const objectsListArray = this.subject.optionList.split("\n")
-          for (let counter = 0; counter < objectsListArray.length; counter++) {
-            if (objectsListArray[counter] !== "") {
-              newOptions
-                .add({
-                  subjectId: newSubjectId,
-                  title: objectsListArray[counter],
-                  order: counter,
-                })
-                .catch((error) => {
-                  console.log("[ERROR] in getting documents: ", error)
-                })
-            }
+        defaultAuth.onAuthStateChanged((user) => {
+          if (user) {
+            this.subject.currentAuthId = user.uid
+          } else {
+            location.href = "/"
           }
-          location.href = "/subject/" + newSubjectId
         })
-        .catch((error) => {
-          console.log("[ERROR] in getting documents: ", error)
+        db.settings({
+          timestampsInSnapshots: true,
         })
+
+        newSubject
+          .add({
+            authId: this.subject.currentAuthId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            title: this.subject.title,
+            isCloseVoted: this.subject.isCloseVoted,
+            isPublic: this.subject.isPublic,
+            visibleOrder: this.subject.visibleOrder,
+          })
+          .then((ref) => {
+            const newSubjectId = ref.id
+            const objectsListArray = this.subject.optionList.split("\n")
+            for (
+              let counter = 0;
+              counter < objectsListArray.length;
+              counter++
+            ) {
+              if (objectsListArray[counter] !== "") {
+                newOptions
+                  .add({
+                    subjectId: newSubjectId,
+                    title: objectsListArray[counter],
+                    order: counter,
+                  })
+                  .catch((error) => {
+                    console.log("[ERROR] in getting documents: ", error)
+                  })
+              }
+            }
+            location.href = "/subject/" + newSubjectId
+          })
+          .catch((error) => {
+            console.log("[ERROR] in getting documents: ", error)
+          })
+      }
     },
   },
 })

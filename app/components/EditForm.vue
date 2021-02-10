@@ -1,10 +1,9 @@
 <template>
-  <v-form class="mainform">
+  <div class="mainform">
     <v-row> 質問の編集 </v-row>
     <v-row>
       <v-textarea
         v-model="titleData"
-        append-outer-icon="mdi-close"
         counter="50"
         hint="入力例：好きなスポーツは？"
         label="質問"
@@ -12,27 +11,20 @@
         rows="1"
         :rules="[
           (v) => v.length <= 50 || '50字以内でお願いします',
-          (v) => v.length + isSubmited != 0 || '入力してください',
+          (v) => v.length != 0 || '入力してください',
         ]"
         @blur="titleData = titleData.replace(/\n/g, '')"
         @keydown.enter.prevent
-        @click:append-outer="titleData = ''"
       />
     </v-row>
     <slot />
     <v-row>
       投票結果の票数を表示するかどうか<v-spacer />
-      <v-switch
-        v-model="isPublicData"
-        :label="`${isPublicMessage(isPublicData)}`"
-      />
+      <v-switch v-model="isPublicData" :label="isPublicMessage" />
     </v-row>
     <v-row>
       投票結果の票数を表示するかどうか<v-spacer />
-      <v-switch
-        v-model="isCloseVotedData"
-        :label="`${isCloseVotedMessage(isCloseVotedData)}`"
-      />
+      <v-switch v-model="isCloseVotedData" :label="isCloseVotedMessage" />
     </v-row>
 
     <v-row>
@@ -40,20 +32,22 @@
         :value="visibleOrderData"
         :items="orderitems"
         label="投票結果を何位まで表示するか"
+        :rules="[(v) => v > 0 || '入力してください']"
         required
       />
     </v-row>
 
     <v-row>
-      <v-spacer />
-      <v-btn v-if="isCreateMode" @click="onpushed">
-        新規作成
-      </v-btn>
-      <v-btn v-else @click="onpushed">
-        更新
-      </v-btn>
+      <v-col class="text-right">
+        <v-btn v-if="isCreateMode" @click="onpushed">
+          新規作成
+        </v-btn>
+        <v-btn v-else @click="onpushed">
+          更新
+        </v-btn>
+      </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script lang="ts">
@@ -98,73 +92,58 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
-    isSubmited: {
-      type: Number,
-      default: 1,
-    },
-  },
-  data() {
-    return {
-      headers: [
-        { text: "ID", value: "id" },
-        { text: "選択肢名", value: "option" },
-      ],
-    }
   },
   computed: {
     titleData: {
-      get() {
+      get(): string {
         return this.$props.title
       },
-      set(value) {
+      set(value: string): void {
         this.$emit("update:title", value)
       },
     },
     optionListData: {
-      get() {
+      get(): string {
         return this.$props.optionListData
       },
-      set(value) {
+      set(value: string): void {
         this.$emit("update:optionListData", value)
       },
     },
     isCloseVotedData: {
-      get() {
+      get(): string {
         return this.$props.isCloseVoted
       },
-      set(value) {
+      set(value: string): void {
         this.$emit("update:isCloseVoted", value)
       },
     },
     isPublicData: {
-      get() {
+      get(): string {
         return this.$props.isPublic
       },
-      set(value) {
+      set(value: string): void {
         this.$emit("update:isPublic", value)
       },
     },
     visibleOrderData: {
-      get() {
-        return this.$props.isCloseVoted
+      get(): number {
+        return this.$props.visibleOrder
       },
-      set(value) {
-        this.$emit("update:isCloseVoted", value)
+      set(value: boolean): void {
+        this.$emit("update:visibleOrder", value)
       },
+    },
+    isPublicMessage(): string {
+      return this.isPublicData ? "公開する" : "公開しない"
+    },
+    isCloseVotedMessage(): string {
+      return this.isCloseVotedData ? "表示する" : "表示しない"
     },
   },
   methods: {
-    isPublicMessage(value: boolean) {
-      return value ? "公開する" : "公開しない"
-    },
-    isCloseVotedMessage(value: boolean) {
-      return value ? "表示する" : "表示しない"
-    },
     onpushed() {
       this.$emit("onpushed")
-    },
-    onEnd() {
-      this.$emit("onend")
     },
   },
 })

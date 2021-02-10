@@ -1,22 +1,24 @@
 <template>
   <v-app>
     <v-container class="px-0" fluid>
-      <edit-form
-        :title.sync="subject.title"
-        :option-list.sync="subject.optionList"
-        :is-public.sync="subject.isPublic"
-        :is-close-vote.sync="subject.isCloseVoted"
-        :visible-order.sync="subject.visibleOrder"
-        :orderitems.sync="subject.orderitems"
-        :option-list-example.sync="subject.optionListExample"
-        :is-create-mode="false"
-        @onpushed="editSubject"
-      >
-        <edit-options
-          :validoptions.sync="validoptions"
-          :invalidoptions.sync="invalidoptions"
-        />
-      </edit-form>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <edit-form
+          :title.sync="subject.title"
+          :option-list.sync="subject.optionList"
+          :is-public.sync="subject.isPublic"
+          :is-close-vote.sync="subject.isCloseVoted"
+          :visible-order.sync="subject.visibleOrder"
+          :orderitems.sync="subject.orderitems"
+          :option-list-example.sync="subject.optionListExample"
+          :is-create-mode="false"
+          @onpushed="editSubject"
+        >
+          <edit-options
+            :validoptions.sync="validoptions"
+            :invalidoptions.sync="invalidoptions"
+          />
+        </edit-form>
+      </v-form>
     </v-container>
   </v-app>
 </template>
@@ -35,10 +37,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      headers: [
-        { text: "ID", value: "id" },
-        { text: "部門名", value: "name" },
-      ],
+      valid: true,
       subject: {
         currentAuthId: "",
         title: "",

@@ -34,7 +34,7 @@
                   rows="1"
                   :rules="[
                     (v) => v.length <= 50 || '50字以内でお願いします',
-                    (v) => v.length + isSubmited > 0 || '入力してください',
+                    (v) => v.length > 0 || '入力してください',
                   ]"
                   @blur="item.option = item.option.replace(/\n/g, '')"
                   @keydown.enter.prevent
@@ -77,8 +77,8 @@
               <td>{{ item.id }}</td>
               <td class="px-2">
                 {{ item.option }}
-                <v-icon style="float: right;" @click="redoOption(i)">
-                  mdi-redo
+                <v-icon style="float: right;" @click="undoOption(i)">
+                  mdi-undo
                 </v-icon>
               </td>
             </tr>
@@ -105,10 +105,6 @@ export default Vue.extend({
     invalidoptions: {
       type: Array,
       default: () => {},
-    },
-    isSubmited: {
-      type: Number,
-      default: 1,
     },
   },
   computed: {
@@ -156,7 +152,7 @@ export default Vue.extend({
       me.renumberOrders()
     },
 
-    redoOption(index: number) {
+    undoOption(index: number) {
       const me = this
       me.validoptionsData.push(me.invalidoptionsData[index])
       me.invalidoptionsData.splice(index, 1)
