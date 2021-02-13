@@ -24,14 +24,25 @@
       </button>
     </div>
     <div v-else class="result">
-      投票結果<br /><br />
+      投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
+      <br /><br />
       <ul>
         <li v-for="option in options" :key="option.id" class="list-option">
-          {{ option.title }}
+          {{ option.rank }}位 … {{ option.title }}
           <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
+          <div v-if="option.comments && option.comments.length > 0">
+            <ul>
+              <span>コメント：</span>
+              <li v-for="comment in option.comments" :key="comment.id">
+                {{ comment }}
+              </li>
+            </ul>
+          </div>
+          <br />
         </li>
       </ul>
       <!-- TODO: 下記リンク先を画面遷移なしで出来ればそうする -->
+      <br />
       <a href="">投票し直す</a><br />
       <a href="/">トップに戻る</a>
     </div>
@@ -48,17 +59,16 @@ export default {
     const currentAuthId = firebase.auth().currentUser.uid
     const currentSubjectId = params.id
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
-    const docData = questionData.subjectData
+    const options = questionData.options
+    // 質問タイトルが未設定か、選択肢がないor一つしかない場合、トップページに戻る
+    if (questionData.title === "" || options.length < 2) {
+      location.href = "/"
+    }
     return {
-      authId: currentAuthId,
-      isCloseVoted: docData.isCloseVoted,
-      isMine: docData.createdMe,
-      isPublic: docData.isPublic,
-      options: questionData.options, // 選択肢の配列. 得票数も格納する
+      ...questionData,
+      authId: currentAuthId, // 同じキーの値を上書き
+      options, // 選択肢の配列. 得票数も格納する
       subjectId: currentSubjectId,
-      title: docData.title,
-      visibleOrder: docData.visibleOrder,
-      votedDocId: questionData.votedDocId,
     }
   },
   data: () => ({
@@ -70,7 +80,6 @@ export default {
     // 投票する
     vote() {
       // 選択されている選択肢のIDを取得
-      // TODO: 空の場合メッセージ出して終わる
       const checkedId = this.checkedOption
       if (checkedId) {
         if (this.votedDocId) {
@@ -95,12 +104,15 @@ export default {
         }
         // 次へ遷移
         this.afterVote()
+      } else {
+        // TODO: 選択肢を未選択の場合にメッセージ出す
+        // alert("選択肢が未選択")
       }
     },
 
     // 投票後の遷移
     afterVote() {
-      if (this.isMine || this.isPublic) {
+      if (this.createMe || this.isPublic) {
         // 自分の質問 or すぐ結果を表示する設定なら, 投票結果を取得＆表示する
         this.showResult = true
         this.getResult()
@@ -110,17 +122,26 @@ export default {
       }
     },
 
-    // 投票結果を選択肢配列に反映する
-    // TODO: isCloseVoted, visibleOrder の値に応じた結果にする
+    // 投票結果を選択肢配列に反映する. この中でコメントも格納する
     getResult() {
       db.collection("votes")
         .where("subjectId", "==", this.subjectId)
         .get()
         .then((docs) => {
-          // 選択肢IDごとに得票数を格納する一時オブジェクトを作成
+          // 選択肢IDごとにコメント、得票数用の一時オブジェクトをそれぞれ作成
+          // TODO: 長いので別関数にする
+          const comments = {}
           const scores = {}
           docs.forEach((doc) => {
-            const optionId = doc.data().optionId
+            const docData = doc.data()
+            const comment = docData.comment
+            const optionId = docData.optionId
+            if (comment) {
+              if (!comments[optionId]) {
+                comments[optionId] = {}
+              }
+              comments[optionId][comment] = ""
+            }
             if (!scores[optionId]) {
               scores[optionId] = 1
             } else {
@@ -135,6 +156,24 @@ export default {
           this.options.sort((a, b) => {
             return a.score < b.score
           })
+          // 順位を計算して格納する
+          let rank = 1
+          let preScore = null
+          this.options = this.options.filter((option) => {
+            if (option.score < preScore) {
+              rank++
+            }
+            option.rank = rank
+            preScore = option.score
+            if (this.visibleOrder > 0 && rank > this.visibleOrder) {
+              // visibleOrder指定があり(0より大きい)、かつrankがvisibleOrderを超えたら
+              // 表示しないので、ここで要素を返さない
+            } else {
+              // 表示する選択肢を返す. この時コメントのオブジェクトを配列で格納する
+              option.comments = Object.keys(comments[option.id])
+              return option
+            }
+          })
         })
         .catch((error) => {
           console.log("[ERROR] in afterVote: ", error)
@@ -144,8 +183,10 @@ export default {
 }
 
 // 質問の情報・選択肢をまとめて取得する
+// 返すオブジェクトを最初に作ってから要素を足している (その方が分かりやすいかと)
 async function getQuestionData(authId, subjectId) {
-  const doc = await db
+  let returnObject = {}
+  const questionDoc = await db
     .collection("subjects")
     .doc(subjectId)
     .get()
@@ -154,12 +195,11 @@ async function getQuestionData(authId, subjectId) {
     })
 
   // 存在しないIDの質問がリクエストされた場合、トップに戻る
-  if (!doc.exists) {
+  if (!questionDoc.exists) {
     location.href = "/"
+  } else {
+    returnObject = questionDoc.data()
   }
-
-  // 質問の情報を取得
-  const docData = doc.data()
 
   // 質問の選択肢を取得
   const querySnapshot = await db
@@ -169,13 +209,30 @@ async function getQuestionData(authId, subjectId) {
     .catch((error) => {
       console.log("[ERROR] in getQuestionData (options): ", error)
     })
-  const optionsAry = []
+
+  // 表示・操作用に選択肢の配列を作成
+  const options = []
   querySnapshot.forEach((doc) => {
-    const data = doc.data()
-    optionsAry.push({ id: doc.id, title: data.title, score: 0 })
+    options.push({ ...doc.data(), id: doc.id, score: 0 })
   })
 
+  // 選択肢をソート (orderがあればその順、なければタイトル順)
+  options.sort((a, b) => {
+    if (a.order && b.order) {
+      return a.order > b.order
+    } else {
+      return a.title > b.title
+    }
+  })
+
+  // 選択肢の配列を、返すオブジェクトに追加
+  returnObject = {
+    ...returnObject,
+    options,
+  }
+
   // 質問に回答済みか否かを取得
+  // 回答済みなら、votesのドキュメントIDをvotedDocIdとして返すオブジェクトに追加
   const votedSnapshot = await db
     .collection("votes")
     .where("authId", "==", authId)
@@ -184,23 +241,18 @@ async function getQuestionData(authId, subjectId) {
     .catch((error) => {
       console.log("[ERROR] in getQuestionData (votedSnapshot): ", error)
     })
-  let tmpVotedDocId = null
+  let votedDocId = null
   if (votedSnapshot.size > 0) {
     votedSnapshot.forEach((doc) => {
-      tmpVotedDocId = doc.id
+      votedDocId = doc.id
     })
   }
-
-  return {
-    createdMe: authId === docData.authId,
-    isCloseVoted: docData.isCloseVoted,
-    isPublic: docData.isPublic,
-    options: optionsAry,
-    subjectData: docData,
-    title: docData.title,
-    visibleOrder: docData.visibleOrder,
-    votedDocId: tmpVotedDocId,
+  returnObject = {
+    ...returnObject,
+    votedDocId,
   }
+
+  return returnObject
 }
 </script>
 
