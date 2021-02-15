@@ -5,7 +5,7 @@ module.exports = {
     node: true,
   },
   parserOptions: {
-    parser: "babel-eslint",
+    parser: "@typescript-eslint/parser",
   },
   extends: [
     "@nuxtjs/eslint-config-typescript",
@@ -22,6 +22,7 @@ module.exports = {
     "prettier/prettier": ["error", { semi: false }],
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-throw-literal": "off",
     "vue/html-self-closing": [
       "error",
       {

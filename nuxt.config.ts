@@ -97,6 +97,10 @@ const config: Configuration = {
   router: {
     middleware: "auth",
   },
+
+  router: {
+    middleware: "auth",
+  },
 }
 
 export default config
