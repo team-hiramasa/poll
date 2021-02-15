@@ -19,7 +19,7 @@
         v-for="(subject, index) in subjects"
         v-else
         :key="index"
-        :to="subject.id"
+        :to="'/subjects/' + subject.id"
         v-text="subject.title"
       />
     </v-list>
