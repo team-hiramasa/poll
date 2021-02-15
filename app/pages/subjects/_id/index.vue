@@ -1,51 +1,59 @@
 <template>
-  <div>
-    <div v-if="showResult === false" class="vote">
-      質問に投票する<br /><br />
-      {{ title }}
-      <form>
-        <ul>
-          <li v-for="option in options" :key="option.id" class="list-option">
-            <input
-              v-model="checkedOption"
-              name="option"
-              type="radio"
-              :value="option.id"
-            />{{ option.title }}
-          </li>
-        </ul>
-      </form>
-      <div class="comment">
-        コメント(任意)<br />
-        <textarea v-model="voteComment" row="5" />
-      </div>
-      <button class="button-vote" @click="vote">
-        投票する
-      </button>
-    </div>
-    <div v-else class="result">
-      投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
-      <br /><br />
-      <ul>
-        <li v-for="option in options" :key="option.id" class="list-option">
-          {{ option.rank }}位 … {{ option.title }}
-          <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
-          <div v-if="option.comments && option.comments.length > 0">
+  <v-app>
+    <v-container class="px-0" fluid>
+      <div>
+        <div v-if="showResult === false" class="vote">
+          質問に投票する<br /><br />
+          {{ title }}
+          <form>
             <ul>
-              <span>コメント：</span>
-              <li v-for="comment in option.comments" :key="comment.id">
-                {{ comment }}
+              <li
+                v-for="option in options"
+                :key="option.id"
+                class="list-option"
+              >
+                <input
+                  v-model="checkedOption"
+                  name="option"
+                  type="radio"
+                  :value="option.id"
+                />{{ option.title }}
               </li>
             </ul>
+          </form>
+          <div class="comment">
+            コメント(任意)<br />
+            <textarea v-model="voteComment" row="5" />
           </div>
+          <button class="button-vote" @click="vote">
+            投票する
+          </button>
+        </div>
+        <div v-else class="result">
+          投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
+          <br /><br />
+          <ul>
+            <li v-for="option in options" :key="option.id" class="list-option">
+              {{ option.rank }}位 … {{ option.title }}
+              <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
+              <div v-if="option.comments && option.comments.length > 0">
+                <ul>
+                  <span>コメント：</span>
+                  <li v-for="comment in option.comments" :key="comment.id">
+                    {{ comment }}
+                  </li>
+                </ul>
+              </div>
+              <br />
+            </li>
+          </ul>
           <br />
-        </li>
-      </ul>
-      <br />
-      <!-- <a href="">投票し直す</a><br /> -->
-      <a href="/">トップに戻る</a>
-    </div>
-  </div>
+          <!-- <a href="">投票し直す</a><br /> -->
+          <a href="/">トップに戻る</a>
+        </div>
+      </div>
+    </v-container>
+  </v-app>
 </template>
 
 <script>
