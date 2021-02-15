@@ -1,35 +1,35 @@
-import colors from 'vuetify/es5/util/colors'
-import { Configuration } from '@nuxt/types'
+import colors from "vuetify/es5/util/colors"
+import { Configuration } from "@nuxt/types"
 
 const config: Configuration = {
   /*
    ** Nuxt rendering mode
    ** See https://nuxtjs.org/api/configuration-mode
    */
-  mode: 'spa',
-  srcDir: 'app',
+  mode: "spa",
+  srcDir: "app",
   /*
    ** Nuxt target
    ** See https://nuxtjs.org/api/configuration-target
    */
-  target: 'server',
+  target: "server",
   /*
    ** Headers of the page
    ** See https://nuxtjs.org/api/configuration-head
    */
   head: {
-    titleTemplate: '%s - ' + process.env.npm_package_name,
-    title: process.env.npm_package_name || '',
+    titleTemplate: "%s - " + process.env.npm_package_name,
+    title: process.env.npm_package_name || "",
     meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { charset: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
       {
-        hid: 'description',
-        name: 'description',
-        content: process.env.npm_package_description || '',
+        hid: "description",
+        name: "description",
+        content: process.env.npm_package_description || "",
       },
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
   },
   /*
    ** Global CSS
@@ -50,9 +50,9 @@ const config: Configuration = {
    */
   buildModules: [
     // Doc: https://github.com/nuxt-community/eslint-module
-    '@nuxtjs/eslint-module',
-    '@nuxt/typescript-build',
-    '@nuxtjs/vuetify',
+    "@nuxtjs/eslint-module",
+    "@nuxt/typescript-build",
+    "@nuxtjs/vuetify",
   ],
   /*
    ** Nuxt.js modules
@@ -63,7 +63,7 @@ const config: Configuration = {
    ** https://github.com/nuxt-community/vuetify-module
    */
   vuetify: {
-    customVariables: ['~/assets/variables.scss'],
+    customVariables: ["~/assets/variables.scss"],
     theme: {
       dark: true,
       themes: {
@@ -85,15 +85,17 @@ const config: Configuration = {
    */
   build: {},
   env: {
-    APP_apiKey: process.env.APP_apiKey,
-    APP_authDomain: process.env.APP_authDomain,
-    APP_databaseURL: process.env.APP_databaseURL,
-    APP_projectId: process.env.APP_projectId,
-    APP_storageBucket: process.env.APP_storageBucket,
-    APP_messagingSenderId: process.env.APP_messagingSenderId,
-    APP_appId: process.env.APP_appId,
-    APP_measurementId: process.env.APP_measurementId,
-    APP_MAPS_JS_API: process.env.APP_MAPS_JS_API,
+    FB_API_KEY: process.env.FB_API_KEY,
+    FB_AUTH_DOMAIN: process.env.FB_AUTH_DOMAIN,
+    FB_DATABASE_URL: process.env.FB_DATABASE_URL,
+    FB_PROJECT_ID: process.env.FB_PROJECT_ID,
+    FB_STORAGE_BUCKET: process.env.FB_STORAGE_BUCKET,
+    FB_MESSAGING_SENDER_ID: process.env.FB_MESSAGING_SENDER_ID,
+    FB_APP_ID: process.env.FB_APP_ID,
+    FB_MEASUREMENT_ID: process.env.FB_MEASUREMENT_ID,
+  },
+  router: {
+    middleware: "auth",
   },
 
   router: {
