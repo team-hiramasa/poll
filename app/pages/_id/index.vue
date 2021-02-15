@@ -170,7 +170,10 @@ export default {
               // 表示しないので、ここで要素を返さない
             } else {
               // 表示する選択肢を返す. この時コメントのオブジェクトを配列で格納する
-              option.comments = Object.keys(comments[option.id])
+              const comment = comments[option.id]
+              if (comment) {
+                option.comments = Object.keys(comment)
+              }
               return option
             }
           })
