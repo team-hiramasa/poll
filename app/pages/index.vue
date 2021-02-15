@@ -10,6 +10,9 @@
           作成した質問
         </v-tab>
       </v-tabs>
+      <v-btn nuxt to="/subjects/edit/new" class="primary">
+        新規作成
+      </v-btn>
     </v-app-bar>
     <v-list>
       <v-list-item v-if="subjects.length === 0">
