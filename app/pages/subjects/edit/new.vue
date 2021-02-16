@@ -92,7 +92,7 @@ export default Vue.extend({
                   })
               }
             }
-            location.href = "/subjects/edit/" + newSubjectId
+            this.$router.push("/subjects/edit/" + newSubjectId)
           })
           .catch((error) => {
             console.log("[ERROR] in getting documents: ", error)

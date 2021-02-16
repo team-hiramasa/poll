@@ -25,7 +25,7 @@ jobs:
     - name: yarn install, build
       run: |
            yarn install
-           yarn build --if-present
+           yarn generate --if-present
       env:
         FB_API_KEY: ${{ secrets.FB_API_KEY }}
         FB_AUTH_DOMAIN: ${{ secrets.FB_AUTH_DOMAIN }}

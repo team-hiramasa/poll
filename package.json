@@ -16,7 +16,7 @@
   "dependencies": {
     "@nuxt/typescript-runtime": "^1.0.0",
     "firebase": "^7.16.1",
-    "nuxt": "^2.13.0",
+    "nuxt": "^2.14.0",
     "save": "^2.4.0",
     "vuedraggable": "^2.24.3"
   },
