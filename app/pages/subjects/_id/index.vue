@@ -1,32 +1,14 @@
 <template>
   <v-app>
-    <v-container class="px-0" fluid>
-      <!--
-      <v-form ref="form" v-model="valid" lazy-validation>
-        <edit-form
-          :title.sync="subject.title"
-          :option-list.sync="subject.optionList"
-          :is-public.sync="subject.isPublic"
-          :is-close-voted.sync="subject.isCloseVoted"
-          :visible-order.sync="subject.visibleOrder"
-          :orderitems.sync="subject.orderitems"
-          :option-list-example.sync="subject.optionListExample"
-          :is-create-mode="true"
-          @onpushed="createSubject"
-        >
-        </edit-form>
-      </v-form>
-      -->
-      <v-app-bar fixed app>
-        <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
-          <v-tabs-slider />
-          <v-tab>
-            質問に投票する
-          </v-tab>
-        </v-tabs>
-      </v-app-bar>
-      <div v-if="showResult === false" class="vote">
-        {{ title }}
+    <v-app-bar fixed app>
+      <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
+        <v-tabs-slider />
+        <v-tab> 質問に投票する </v-tab>
+      </v-tabs>
+    </v-app-bar>
+    <div class="mainform">
+      <v-form v-if="showResult === false">
+        <v-row> {{ title }} </v-row>
         <v-radio-group v-model="checkedOption">
           <v-radio
             v-for="option in options"
@@ -36,17 +18,18 @@
             name="option"
           />
         </v-radio-group>
-        <div class="comment">
-          コメント(任意)<br />
-          <textarea v-model="voteComment" row="5" />
-        </div>
-        <button class="button-vote" @click="vote">
-          投票する
-        </button>
-      </div>
-      <div v-else class="result">
-        投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
-        <br /><br />
+        <v-textarea
+          v-model="voteComment"
+          class="comment"
+          label="コメント(任意)"
+          rows="2"
+        />
+        <v-btn @click="vote"> 投票する </v-btn>
+      </v-form>
+      <v-layout v-else class="result" wrap>
+        <v-row>
+          投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
+        </v-row>
         <ul>
           <li v-for="option in options" :key="option.id" class="list-option">
             {{ option.rank }}位 … {{ option.title }}
@@ -62,20 +45,19 @@
             <br />
           </li>
         </ul>
-        <br />
-        <!-- <a href="">投票し直す</a><br /> -->
-        <a href="/">トップに戻る</a>
-      </div>
-    </v-container>
+        <v-btn @click="returnTop"> 最初に戻る </v-btn>
+      </v-layout>
+    </div>
   </v-app>
 </template>
 
 <script>
+import Vue from "vue"
 import firebase from "~/plugins/firebase.ts"
 
 const db = firebase.firestore()
 
-export default {
+export default Vue.extend({
   async asyncData({ params }) {
     const currentAuthId = firebase.auth().currentUser.uid
     const currentSubjectId = params.id
@@ -203,8 +185,12 @@ export default {
           console.log("[ERROR] in afterVote: ", error)
         })
     },
+    returnTop() {
+      location.href = "/"
+    },
   },
-}
+  // }
+})
 
 // 質問の情報・選択肢をまとめて取得する
 // 返すオブジェクトを最初に作ってから要素を足している (その方が分かりやすいかと)
@@ -281,21 +267,8 @@ async function getQuestionData(authId, subjectId) {
 </script>
 
 <style lang="scss" scoped>
-.vote {
-  .button-vote {
-    background-color: white;
-    border-radius: 0.2em;
-    color: black;
-    padding: 0.2em 0.5em;
-  }
-  .list-option {
-    list-style-type: none;
-  }
-  .comment {
-    textarea {
-      background-color: white;
-      color: black;
-    }
-  }
+.mainform {
+  margin: 25px auto 0;
+  width: 480px;
 }
 </style>
