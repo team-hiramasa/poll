@@ -1,6 +1,22 @@
 <template>
   <v-app>
     <v-container class="px-0" fluid>
+      <!--
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <edit-form
+          :title.sync="subject.title"
+          :option-list.sync="subject.optionList"
+          :is-public.sync="subject.isPublic"
+          :is-close-voted.sync="subject.isCloseVoted"
+          :visible-order.sync="subject.visibleOrder"
+          :orderitems.sync="subject.orderitems"
+          :option-list-example.sync="subject.optionListExample"
+          :is-create-mode="true"
+          @onpushed="createSubject"
+        >
+        </edit-form>
+      </v-form>
+      -->
       <v-app-bar fixed app>
         <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
           <v-tabs-slider />
@@ -11,18 +27,15 @@
       </v-app-bar>
       <div v-if="showResult === false" class="vote">
         {{ title }}
-        <form>
-          <ul>
-            <li v-for="option in options" :key="option.id" class="list-option">
-              <input
-                v-model="checkedOption"
-                name="option"
-                type="radio"
-                :value="option.id"
-              />{{ option.title }}
-            </li>
-          </ul>
-        </form>
+        <v-radio-group v-model="checkedOption">
+          <v-radio
+            v-for="option in options"
+            :key="option.id"
+            :label="`${option.title}`"
+            :value="option.id"
+            name="option"
+          />
+        </v-radio-group>
         <div class="comment">
           コメント(任意)<br />
           <textarea v-model="voteComment" row="5" />
