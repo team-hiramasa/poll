@@ -37,8 +37,7 @@
             {{ option.rank }}位 … {{ option.title }}
             <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
             <div v-if="option.comments && option.comments.length > 0">
-              <ul>
-                <span>コメント：</span>
+              <ul class="comments">
                 <li v-for="comment in option.comments" :key="comment.id">
                   {{ comment }}
                 </li>
@@ -274,5 +273,11 @@ async function getQuestionData(authId, subjectId) {
 .mainform {
   margin: 25px auto 0;
   width: 480px;
+}
+.comments {
+  list-style-type: none;
+  li:before {
+    content: "💬";
+  }
 }
 </style>
