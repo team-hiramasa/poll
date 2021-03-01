@@ -24,7 +24,9 @@
           label="コメント(任意)"
           rows="2"
         />
-        <v-btn @click="vote"> 投票する </v-btn>
+        <v-btn @click="vote">
+          投票する
+        </v-btn>
       </v-form>
       <v-layout v-else class="result" wrap>
         <v-row>
@@ -45,7 +47,9 @@
             <br />
           </li>
         </ul>
-        <v-btn @click="returnTop"> 最初に戻る </v-btn>
+        <v-btn @click="returnTop">
+          最初に戻る
+        </v-btn>
       </v-layout>
     </div>
   </v-app>
