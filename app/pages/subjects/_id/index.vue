@@ -36,7 +36,7 @@
           <li v-for="option in options" :key="option.id" class="list-option">
             {{ option.rank }}位 … {{ option.title }}
             <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
-            <div v-if="option.comments && option.comments.length > 0">
+            <div>
               <ul class="comments">
                 <li v-for="comment in option.comments" :key="comment.id">
                   {{ comment }}
