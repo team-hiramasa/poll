@@ -3,7 +3,15 @@
     <v-app-bar fixed app>
       <v-tabs class="elevation-2" dark centered="centered" fixed-tabs>
         <v-tabs-slider />
-        <v-tab> 質問に投票する </v-tab>
+        <v-tab>
+          <span v-if="showResult === false">
+            質問に投票する
+          </span>
+          <span v-else>
+            投票結果
+            <span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
+          </span>
+        </v-tab>
       </v-tabs>
     </v-app-bar>
     <div class="mainform">
@@ -24,14 +32,8 @@
           label="コメント(任意)"
           rows="2"
         />
-        <v-btn @click="vote">
-          投票する
-        </v-btn>
       </v-form>
       <v-layout v-else class="result" wrap>
-        <v-row>
-          投票結果<span v-if="isCloseVoted === true">（カッコ内は得数数）</span>
-        </v-row>
         <ul>
           <li v-for="option in options" :key="option.id" class="list-option">
             {{ option.rank }}位 … {{ option.title }}
@@ -46,9 +48,18 @@
             <br />
           </li>
         </ul>
-        <v-btn @click="returnTop">
-          最初に戻る
-        </v-btn>
+      </v-layout>
+      <v-layout my-5 text-center>
+        <v-flex>
+          <v-btn v-if="showResult === false" @click="vote">
+            投票する
+          </v-btn>
+        </v-flex>
+        <v-flex>
+          <v-btn @click="returnTop">
+            最初に戻る
+          </v-btn>
+        </v-flex>
       </v-layout>
     </div>
   </v-app>
