@@ -44,6 +44,9 @@
                   {{ comment }}
                 </li>
               </ul>
+              <ul v-if="!option.comments">
+                （コメントなし）
+              </ul>
             </div>
             <br />
           </li>
