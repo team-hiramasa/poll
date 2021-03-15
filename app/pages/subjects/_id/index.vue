@@ -145,14 +145,15 @@ export default Vue.extend({
         .where("subjectId", "==", this.subjectId)
         .get()
         .then((docs) => {
-          // 選択肢IDごとにコメント、得票数用の一時オブジェクトをそれぞれ作成
-          // TODO: 長いので別関数にする
+          // 選択肢IDごとに別メソッドで処理
           this.getResultDetail(docs)
         })
         .catch((error) => {
           console.log("[ERROR] in afterVote: ", error)
         })
     },
+
+    // 選択肢ごとにコメント、得票数の一時オブジェクトを作成. 最後に別メソッドへ渡す
     getResultDetail(docs) {
       const comments = {}
       const scores = {}
@@ -172,6 +173,11 @@ export default Vue.extend({
           scores[optionId]++
         }
       })
+      this.setResultObject(comments, scores)
+    },
+
+    // コメント、得票数の情報をグローバルなオブジェクトに入れる
+    setResultObject(comments, scores) {
       // 得票数を選択肢配列に転記
       this.options.forEach((option) => {
         option.score = scores[option.id] || 0
@@ -202,6 +208,8 @@ export default Vue.extend({
         }
       })
     },
+
+    // ボタン「最初へ戻る」用
     returnTop() {
       location.href = "/"
     },
