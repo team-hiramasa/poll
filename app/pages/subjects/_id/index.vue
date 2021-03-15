@@ -147,57 +147,60 @@ export default Vue.extend({
         .then((docs) => {
           // 選択肢IDごとにコメント、得票数用の一時オブジェクトをそれぞれ作成
           // TODO: 長いので別関数にする
-          const comments = {}
-          const scores = {}
-          docs.forEach((doc) => {
-            const docData = doc.data()
-            const comment = docData.comment
-            const optionId = docData.optionId
-            if (comment) {
-              if (!comments[optionId]) {
-                comments[optionId] = {}
-              }
-              comments[optionId][comment] = ""
-            }
-            if (!scores[optionId]) {
-              scores[optionId] = 1
-            } else {
-              scores[optionId]++
-            }
-          })
-          // 得票数を選択肢配列に転記
-          this.options.forEach((option) => {
-            option.score = scores[option.id] || 0
-          })
-          // 選択肢配列を得票数の降順にソート
-          this.options.sort((a, b) => {
-            return a.score < b.score
-          })
-          // 順位を計算して格納する
-          let rank = 1
-          let preScore = null
-          this.options = this.options.filter((option) => {
-            if (option.score < preScore) {
-              rank++
-            }
-            option.rank = rank
-            preScore = option.score
-            if (this.visibleOrder > 0 && rank > this.visibleOrder) {
-              // visibleOrder指定があり(0より大きい)、かつrankがvisibleOrderを超えたら
-              // 表示しないので、ここで要素を返さない
-            } else {
-              // 表示する選択肢を返す. この時コメントのオブジェクトを配列で格納する
-              const comment = comments[option.id]
-              if (comment) {
-                option.comments = Object.keys(comment)
-              }
-              return option
-            }
-          })
+          this.getResultDetail(docs)
         })
         .catch((error) => {
           console.log("[ERROR] in afterVote: ", error)
         })
+    },
+    getResultDetail(docs) {
+      const comments = {}
+      const scores = {}
+      docs.forEach((doc) => {
+        const docData = doc.data()
+        const comment = docData.comment
+        const optionId = docData.optionId
+        if (comment) {
+          if (!comments[optionId]) {
+            comments[optionId] = {}
+          }
+          comments[optionId][comment] = ""
+        }
+        if (!scores[optionId]) {
+          scores[optionId] = 1
+        } else {
+          scores[optionId]++
+        }
+      })
+      // 得票数を選択肢配列に転記
+      this.options.forEach((option) => {
+        option.score = scores[option.id] || 0
+      })
+      // 選択肢配列を得票数の降順にソート
+      this.options.sort((a, b) => {
+        return a.score < b.score
+      })
+      // 順位を計算して格納する
+      let rank = 1
+      let preScore = null
+      this.options = this.options.filter((option) => {
+        if (option.score < preScore) {
+          rank++
+        }
+        option.rank = rank
+        preScore = option.score
+        if (this.visibleOrder > 0 && rank > this.visibleOrder) {
+          // visibleOrder指定があり(0より大きい)、かつrankがvisibleOrderを超えたら
+          // 表示しないので、ここで要素を返さない
+        } else {
+          // 表示する選択肢を返す. この時コメントのオブジェクトを配列で格納する
+          const comment = comments[option.id]
+          if (comment) {
+            option.comments = Object.keys(comment)
+          }
+          return option
+        }
+      })
     },
     returnTop() {
       location.href = "/"
