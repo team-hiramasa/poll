@@ -33,23 +33,34 @@
           rows="2"
         />
       </v-form>
-      <v-layout v-else class="result" wrap>
+      <v-layout v-else class="result">
+        <v-flex v-for="(rank, index) in ranking" :key="index">
+          {{ index + 1 }}位
+          <ul>
+            <li v-for="option in rank" :key="option.id">
+              {{ option.title }}
+              <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
+              <div>
+                <ul class="comments">
+                  <li v-for="comment in option.comments" :key="comment.id">
+                    {{ comment }}
+                  </li>
+                </ul>
+                <ul v-if="!option.comments">
+                  （コメントなし）
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </v-flex>
         <ul>
-          <li v-for="option in options" :key="option.id" class="list-option">
-            {{ option.rank }}位 … {{ option.title }}
-            <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
-            <div>
-              <ul class="comments">
-                <li v-for="comment in option.comments" :key="comment.id">
-                  {{ comment }}
-                </li>
-              </ul>
-              <ul v-if="!option.comments">
-                （コメントなし）
-              </ul>
-            </div>
-            <br />
-          </li>
+          <!-- なぜかoptionsを使わないとrankingを使うループが回らない -->
+          <!-- TODO: 後で詳細調査 -->
+          <li
+            v-for="option in options"
+            :key="option.id"
+            style="display: none;"
+          />
         </ul>
       </v-layout>
       <v-layout my-5 text-center>
@@ -80,6 +91,7 @@ export default Vue.extend({
     const currentSubjectId = params.id
     const questionData = await getQuestionData(currentAuthId, currentSubjectId)
     const options = questionData.options
+    const ranking = []
     // 質問タイトルが未設定か、選択肢がないor一つしかない場合、トップページに戻る
     if (questionData.title === "" || options.length < 2) {
       location.href = "/"
@@ -88,6 +100,7 @@ export default Vue.extend({
       ...questionData,
       authId: currentAuthId, // 同じキーの値を上書き
       options, // 選択肢の配列. 得票数も格納する
+      ranking, // 投票結果の順位別に選択肢をまとめた配列
       subjectId: currentSubjectId,
     }
   },
@@ -210,6 +223,15 @@ export default Vue.extend({
           return option
         }
       })
+      // 順位別のオブジェクトに格納
+      this.options.forEach((option) => {
+        const rankIndex = option.rank - 1
+        if (!this.ranking[rankIndex]) {
+          this.ranking[rankIndex] = []
+        }
+        this.ranking[rankIndex].push(option)
+      })
+      console.log(this.ranking) // for debug
     },
 
     // ボタン「最初へ戻る」用
@@ -217,7 +239,6 @@ export default Vue.extend({
       location.href = "/"
     },
   },
-  // }
 })
 
 // 質問の情報・選択肢をまとめて取得する
