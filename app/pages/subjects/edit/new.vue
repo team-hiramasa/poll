@@ -26,7 +26,7 @@ import firebase from "@/plugins/firebase"
 import EditForm from "@/components/EditForm.vue"
 const db = firebase.firestore()
 const defaultAuth = firebase.auth()
-let uid = ""
+
 export default Vue.extend({
   components: {
     EditForm,
@@ -46,32 +46,24 @@ export default Vue.extend({
     }
   },
   methods: {
-    setUid(value: string) {
-      uid = value
-    },
-    getUid() {
-      return uid
-    },
-    createSubject() {
+    async createSubject() {
       const form: any = this.$refs.form
       if (form.validate()) {
         const newSubject = db.collection("subjects")
         const newOptions = db.collection("options")
-        defaultAuth.onAuthStateChanged((user) => {
+
+        await defaultAuth.onAuthStateChanged((user) => {
           if (user) {
-            this.setUid(user.uid)
-            console.log("user.uid: " + user.uid)
-            console.log("let uid: " + uid)
+            this.subject.currentAuthId = user.uid
           } else {
             location.href = "/"
           }
         })
 
-        console.log("You are " + uid)
         newSubject
           .add({
+            authId: this.subject.currentAuthId,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            authId: this.getUid(),
             title: this.subject.title,
             isCloseVoted: this.subject.isCloseVoted,
             isPublic: this.subject.isPublic,
