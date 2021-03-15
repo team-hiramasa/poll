@@ -40,7 +40,7 @@ const config: Configuration = {
    ** Plugins to load before mounting the App
    ** https://nuxtjs.org/guide/plugins
    */
-  plugins: [],
+  plugins: [{ src: "~/plugins/localStorage.ts", ssr: false }],
   /*
    ** Auto import components
    ** See https://nuxtjs.org/api/configuration-components
@@ -54,6 +54,7 @@ const config: Configuration = {
     "@nuxtjs/eslint-module",
     "@nuxt/typescript-build",
     "@nuxtjs/vuetify",
+    "nuxt-typed-vuex",
   ],
   /*
    ** Nuxt.js modules
@@ -84,7 +85,11 @@ const config: Configuration = {
    ** Build configuration
    ** See https://nuxtjs.org/api/configuration-build/
    */
-  build: {},
+  build: {
+    transpile: [/typed-vuex/],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    extend(config: any, ctx: any) {},
+  },
   env: {
     FB_API_KEY: process.env.FB_API_KEY,
     FB_AUTH_DOMAIN: process.env.FB_AUTH_DOMAIN,
@@ -95,10 +100,6 @@ const config: Configuration = {
     FB_APP_ID: process.env.FB_APP_ID,
     FB_MEASUREMENT_ID: process.env.FB_MEASUREMENT_ID,
   },
-  router: {
-    middleware: "auth",
-  },
-
   router: {
     middleware: "auth",
   },

@@ -8299,6 +8299,15 @@ num2fraction@^1.2.2:
   resolved "https://registry.yarnpkg.com/num2fraction/-/num2fraction-1.2.2.tgz#6f682b6a027a4e9ddfa4564cd2589d1d4e669ede"
   integrity sha1-b2gragJ6Tp3fpFZM0lidHU5mnt4=
 
+nuxt-typed-vuex@^0.1.22:
+  version "0.1.22"
+  resolved "https://registry.yarnpkg.com/nuxt-typed-vuex/-/nuxt-typed-vuex-0.1.22.tgz#aff07cc39985146a75e8b40678fe0f2011d1a561"
+  integrity sha512-2X7/BSbN/tlBfVi5BR3unHTpVOnxxfiltR+E8XLdhlK9KHgSOWyDbnqFtxB5VAXA9efgTFlCq9UwG1xby+ubXQ==
+  dependencies:
+    consola "^2.15.0"
+    normalize-path "^3.0.0"
+    typed-vuex "0.1.22"
+
 nuxt@^2.14.0:
   version "2.15.0"
   resolved "https://registry.yarnpkg.com/nuxt/-/nuxt-2.15.0.tgz#c13e4173e165a1cd538ecc19a05c25a8d3889404"
@@ -10441,6 +10450,11 @@ shellwords@^0.1.1:
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
+shvl@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/shvl/-/shvl-2.0.2.tgz#eca7decb9bbd4e8dd93f06ea9ab94036319cd351"
+  integrity sha512-G3KkIXPza3dgkt6Bo8zIl5K/KvAAhbG6o9KfAjhPvrIIzzAhnfc2ztv1i+iPTbNNM43MaBUqIaZwqVjkSgY/rw==
+
 sigmund@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/sigmund/-/sigmund-1.0.1.tgz#3ff21f198cad2175f9f3b781853fd94d0d19b590"
@@ -11324,6 +11338,11 @@ type-fest@^0.8.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
+typed-vuex@0.1.22:
+  version "0.1.22"
+  resolved "https://registry.yarnpkg.com/typed-vuex/-/typed-vuex-0.1.22.tgz#e35a896fa7d76b37904041d38c55037b70ccf240"
+  integrity sha512-WJkYbLX9DbnjVnSKS1LNrqEXB6gbRCfk2qExAA+wa1RGQAURZpdSQ/A33YkgfQbzNitJbgR0qzjE7jclSWC6Ag==
+
 typedarray-to-buffer@^3.1.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/typedarray-to-buffer/-/typedarray-to-buffer-3.1.5.tgz#a97ee7a9ff42691b9f783ff1bc5112fe3fca9080"
@@ -11729,6 +11748,14 @@ vuetify@^2:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.3.4.tgz#fdb03b3281d40a8420b0295ea865843abdc69792"
   integrity sha512-vMtCNqv5BhrjfTfIhH2Lptoxx7z/Nu1NfBiZ2oCvI2QbTagMlhF5GMXgbnnyTGIjooFf/ozKznuMxk6tuI5cxw==
+
+vuex-persistedstate@^4.0.0-beta.3:
+  version "4.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/vuex-persistedstate/-/vuex-persistedstate-4.0.0-beta.3.tgz#89dd712de72d28e85cc95467d066002c1405f277"
+  integrity sha512-T4IRD27qoUWh+8qr6T6zVp15xO7x/nPgnU13OD0C2uUwA7U9PhGozrj6lvVmMYDyRgc36J0msMXn3GvwHjkIhA==
+  dependencies:
+    deepmerge "^4.2.2"
+    shvl "^2.0.2"
 
 vuex@^3.6.2:
   version "3.6.2"
