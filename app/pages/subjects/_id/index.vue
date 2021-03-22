@@ -33,11 +33,11 @@
           rows="2"
         />
       </v-form>
-      <v-layout v-else class="result">
-        <v-flex v-for="(rank, index) in ranking" :key="index">
+      <v-layout v-else class="results">
+        <v-flex v-for="(rank, index) in ranking" :key="index" class="rank">
           {{ index + 1 }}位
           <ul>
-            <li v-for="option in rank" :key="option.id">
+            <li v-for="option in rank" :key="option.id" class="option">
               {{ option.title }}
               <span v-if="isCloseVoted === true">（{{ option.score }}）</span>
               <div>
@@ -63,9 +63,9 @@
           />
         </ul>
       </v-layout>
-      <v-layout my-5 text-center>
-        <v-flex>
-          <v-btn v-if="showResult === false" @click="vote">
+      <v-layout my-9 text-center>
+        <v-flex v-if="showResult === false">
+          <v-btn @click="vote">
             投票する
           </v-btn>
         </v-flex>
@@ -318,12 +318,30 @@ async function getQuestionData(authId, subjectId) {
 <style lang="scss" scoped>
 .mainform {
   margin: 25px auto 0;
-  width: 480px;
-}
-.comments {
-  list-style-type: none;
-  li:before {
-    content: "💬";
+  width: 100%;
+
+  .results {
+    flex-direction: column;
+    .rank {
+      align-items: center;
+      border-bottom: dashed white 1px;
+      display: flex;
+      justify-content: center;
+      ul {
+        display: flex;
+        list-style-type: none;
+        .option {
+          flex-direction: column;
+          padding: 1em 2em;
+          .comments {
+            list-style-type: none;
+            li:before {
+              content: "💬";
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style>
