@@ -46,21 +46,18 @@ export default Vue.extend({
     }
   },
   methods: {
-    createSubject() {
+    async createSubject() {
       const form: any = this.$refs.form
       if (form.validate()) {
         const newSubject = db.collection("subjects")
         const newOptions = db.collection("options")
 
-        defaultAuth.onAuthStateChanged((user) => {
+        await defaultAuth.onAuthStateChanged((user) => {
           if (user) {
             this.subject.currentAuthId = user.uid
           } else {
             location.href = "/"
           }
-        })
-        db.settings({
-          timestampsInSnapshots: true,
         })
 
         newSubject
