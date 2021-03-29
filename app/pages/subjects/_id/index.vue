@@ -46,7 +46,7 @@
                     {{ comment }}
                   </li>
                 </ul>
-                <ul class="comments" v-if="!option.comments">
+                <ul v-if="!option.comments" class="comments">
                   <li class="no-comment">
                     （コメントなし）
                   </li>
