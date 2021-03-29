@@ -46,8 +46,10 @@
                     {{ comment }}
                   </li>
                 </ul>
-                <ul v-if="!option.comments">
-                  （コメントなし）
+                <ul class="comments" v-if="!option.comments">
+                  <li class="no-comment">
+                    （コメントなし）
+                  </li>
                 </ul>
               </div>
             </li>
@@ -334,8 +336,12 @@ async function getQuestionData(authId, subjectId) {
           flex-direction: column;
           padding: 1em 2em;
           .comments {
+            flex-flow: column;
             list-style-type: none;
-            li:before {
+            li {
+              margin-top: 0.25em;
+            }
+            li:not(.no-comment):before {
               content: "💬";
             }
           }
